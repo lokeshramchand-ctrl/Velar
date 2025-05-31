@@ -78,6 +78,7 @@ mongoose.connect('mongodb://localhost:27017/chat', {
 const transactionSchema = new mongoose.Schema({
   description: String,
   amount: Number,
+  
   category: String, // 👈 added category
   date: { type: Date, default: Date.now },
 });
@@ -90,7 +91,7 @@ app.post('/api/transaction/add', async (req, res) => {
     const { description, amount } = req.body;
 
     // Call your AI prediction endpoint
-    const predictRes = await axios.post('http://192.168.172.140:5000/api/predict', {
+    const predictRes = await axios.post('http://10.117.157.140:5000/api/predict', {
       description,
     });
 
