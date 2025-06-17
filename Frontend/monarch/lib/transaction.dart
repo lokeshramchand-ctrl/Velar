@@ -64,7 +64,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
     try {
       final uri = Uri.parse(
-        'http://192.168.172.140:3000/api/transactions',
+        'http://192.168.1.5:3000/api/transactions',
       ).replace(
         queryParameters: category == 'All' ? null : {'category': category},
       );

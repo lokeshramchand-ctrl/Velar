@@ -91,7 +91,7 @@ app.post('/api/transaction/add', async (req, res) => {
     const { description, amount } = req.body;
 
     // Call your AI prediction endpoint
-    const predictRes = await axios.post('http://10.117.157.140:5000/api/predict', {
+    const predictRes = await axios.post('http://192.168.29.129:5000/api/predict', {
       description,
     });
 

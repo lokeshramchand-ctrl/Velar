@@ -4,9 +4,11 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:monarch/static.dart';
 import 'package:monarch/transaction.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized(); // This fixes the issue
   runApp(const MyApp());
 }
 
@@ -18,7 +20,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const AddTransactionPage(),
+      home: const Statistics(),
     );
   }
 }
@@ -43,7 +45,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.172.140:3000/api/transaction/add'),
+        Uri.parse('http://192.168.1.5:3000/api/transaction/add'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'description': descriptionController.text,
