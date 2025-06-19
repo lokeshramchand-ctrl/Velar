@@ -4,8 +4,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:monarch/homepage.dart';
+//import 'package:monarch/homepage.dart';
 import 'package:monarch/static.dart';
-import 'package:monarch/transaction.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized(); // This fixes the issue
@@ -20,7 +21,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const Statistics(),
+      home: const FinTrackHomePage(),
     );
   }
 }
@@ -45,7 +46,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.1.5:3000/api/transaction/add'),
+        Uri.parse('http://192.168.1.9:3000/api/transaction/add'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'description': descriptionController.text,
@@ -78,7 +79,10 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
         );
       }
     } catch (e) {
-      Navigator.of(context).pop(); // Close loading dialog
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const Statistics()),
+      );
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('⚠️ Error: $e')));
@@ -108,9 +112,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const TransactionsPage(),
-                  ),
+                  MaterialPageRoute(builder: (context) => const Statistics()),
                 );
               },
               child: const Text('NextPage'),
