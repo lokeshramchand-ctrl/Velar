@@ -104,14 +104,14 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
     // Ensure only one decimal point
     List<String> parts = cleanValue.split('.');
     if (parts.length > 2) {
-      cleanValue = '${parts[0]}.${parts.sublist(1).join('')}';
+      cleanValue = '₹{parts[0]}.₹{parts.sublist(1).join('')}';
     }
 
     if (cleanValue.isNotEmpty) {
       double? amount = double.tryParse(cleanValue);
       if (amount != null) {
         setState(() {
-          _displayAmount = '\$${amount.toStringAsFixed(2)}';
+          _displayAmount = '₹${amount.toStringAsFixed(2)}';
         });
       }
     }
@@ -496,7 +496,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
                               ),
                               child: Text(
                                 _displayAmount.isEmpty
-                                    ? '\$0.00'
+                                    ? '₹0.00'
                                     : _displayAmount,
                                 style: GoogleFonts.inter(
                                   fontSize: 36,

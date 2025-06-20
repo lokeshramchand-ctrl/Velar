@@ -23,7 +23,7 @@ const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`✅ Server running on http://localhost:${PORT}`);
 });
-*/ 
+*/
 /*
 const express = require('express');
 const mongoose = require('mongoose');
@@ -78,7 +78,7 @@ mongoose.connect('mongodb://localhost:27017/chat', {
 const transactionSchema = new mongoose.Schema({
   description: String,
   amount: Number,
-  
+
   category: String, // 👈 added category
   date: { type: Date, default: Date.now },
 });
@@ -112,6 +112,16 @@ app.post('/api/transaction/add', async (req, res) => {
   } catch (err) {
     console.error('❌ Error adding transaction:', err.message);
     res.status(500).json({ error: err.message });
+  }
+});
+app.post('/api/transaction/update', async (req, res) => {
+  try {
+    const { budget } = req.body;
+    // Save to database or wherever you store budgets
+    await BudgetModel.updateOne({}, { amount: budget }, { upsert: true });
+    res.status(200).json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update budget' });
   }
 });
 // GET transactions by category
