@@ -20,7 +20,7 @@ class CustomNavBar extends StatelessWidget {
     required this.backgroundColor,
     required this.accentColor,
     required this.primaryColor,
-    required this.cardColor,
+    required this.cardColor, required FloatingActionButtonLocation floatingActionButtonLocation,
   });
 
   // Define navigation items configuration

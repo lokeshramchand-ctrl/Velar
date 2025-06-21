@@ -1,10 +1,8 @@
 // ignore_for_file: deprecated_member_use, use_build_context_synchronously
 
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart' as http;
 
 class BudgetScreen extends StatefulWidget {
   const BudgetScreen({super.key});
@@ -223,8 +221,19 @@ class _BudgetScreenState extends State<BudgetScreen>
   }
 
   Widget _buildAddButton(BuildContext context) {
-    return GestureDetector(
-      onTap: _addTransaction,
+    return ElevatedButton(
+      onPressed: () {
+        final amount = double.tryParse(amountController.text);
+        if (amount != null && amount > 0) {
+          Navigator.pop(context, amount); // Simply return the value
+        } else if (amount == null || amount <= 0) {
+          _showCustomSnackBar(
+            message: 'Please enter a valid budget amount',
+            icon: Icons.error,
+            backgroundColor: Colors.red,
+          );
+        }
+      },
       child: Container(
         width: double.infinity,
         height: _responsiveHeight(60, context),
@@ -273,7 +282,7 @@ class _BudgetScreenState extends State<BudgetScreen>
   }
 
   void _handleKeyPress(String text) {
-    HapticFeedback.lightImpact();
+    HapticFeedback.heavyImpact();
     if (text == '⌫') {
       if (amountController.text.isNotEmpty) {
         amountController.text = amountController.text.substring(
@@ -312,109 +321,6 @@ class _BudgetScreenState extends State<BudgetScreen>
         setState(() => _displayAmount = '₹${amount.toStringAsFixed(2)}');
       }
     }
-  }
-
-  Future<void> _addTransaction() async {
-    if (amountController.text.trim().isEmpty) {
-      _showCustomSnackBar(
-        message: 'Please enter an amount',
-        icon: Icons.warning_rounded,
-        backgroundColor: const Color(0xFFFF6B6B),
-      );
-      return;
-    }
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => _buildLoadingDialog(),
-    );
-
-    try {
-      final response = await http
-          .post(
-            Uri.parse('http://192.168.1.9:3000/api/transaction/add'),
-            headers: {'Content-Type': 'application/json'},
-            body: json.encode({
-              'amount': double.tryParse(amountController.text),
-            }),
-          )
-          .timeout(const Duration(seconds: 10));
-
-      Navigator.of(context).pop();
-
-      if (response.statusCode == 200) {
-        _handleSuccessResponse(response);
-      } else {
-        _showError('Failed to add transaction');
-      }
-    } catch (e) {
-      Navigator.of(context).pop();
-      _showError('Network error occurred');
-    }
-  }
-
-  Widget _buildLoadingDialog() {
-    return Center(
-      child: Container(
-        padding: EdgeInsets.all(_responsiveWidth(24, context)),
-        decoration: BoxDecoration(
-          color: cardColor,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: primaryColor.withOpacity(0.1),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(accentColor),
-              strokeWidth: 3,
-            ),
-            SizedBox(height: _responsiveHeight(16, context)),
-            Text(
-              'Processing...',
-              style: GoogleFonts.inter(
-                fontSize: _responsiveText(16, context),
-                fontWeight: FontWeight.w500,
-                color: primaryColor,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _handleSuccessResponse(http.Response response) {
-    final responseData = json.decode(response.body);
-    final category = responseData['data']['category'];
-
-    amountController.clear();
-    setState(() => _displayAmount = '');
-
-    _showCustomSnackBar(
-      message: 'Added successfully!\nCategory: $category',
-      icon: Icons.check_circle_rounded,
-      backgroundColor: accentColor,
-    );
-
-    Future.delayed(const Duration(seconds: 1), () {
-      if (mounted) Navigator.pop(context);
-    });
-  }
-
-  void _showError(String message) {
-    _showCustomSnackBar(
-      message: message,
-      icon: Icons.error_rounded,
-      backgroundColor: const Color(0xFFFF6B6B),
-    );
   }
 
   void _showCustomSnackBar({
