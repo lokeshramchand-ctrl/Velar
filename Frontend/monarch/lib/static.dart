@@ -172,7 +172,12 @@ class StatisticsState extends State<Statistics> with TickerProviderStateMixin {
               borderRadius: BorderRadius.circular(responsiveWidth(22)),
               child: InkWell(
                 borderRadius: BorderRadius.circular(responsiveWidth(22)),
-                onTap: () => Navigator.pop(context),
+                onTap: () => Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AddExpenseScreen(),
+                  ),
+                ),
                 child: Icon(
                   Icons.arrow_back_ios_rounded,
                   color: primaryColor,
@@ -713,8 +718,8 @@ class StatisticsState extends State<Statistics> with TickerProviderStateMixin {
         accentColor: accentColor,
         primaryColor: primaryColor,
         cardColor: cardColor,
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        ),
     );
   }
 }

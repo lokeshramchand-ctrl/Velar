@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:monarch/add.dart';
 import 'package:monarch/navbar.dart';
 //import 'package:monarch/static.dart';
 
@@ -253,8 +254,13 @@ class _FinTrackHomePageState extends State<FinTrackHomePage>
         Expanded(
           child: GestureDetector(
             onTap: () {
-              HapticFeedback.lightImpact();
-              // Navigate to Add Expense
+              HapticFeedback.heavyImpact();
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AddExpenseScreen(),
+                ),
+              );
             },
             child: Container(
               padding: const EdgeInsets.all(20),
@@ -597,70 +603,6 @@ class _FinTrackHomePageState extends State<FinTrackHomePage>
 
                   // Quick Actions
                   _buildQuickActions(),
-
-                  const SizedBox(height: 32),
-
-                  // AI Insight Card
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Colors.purple.withOpacity(0.1),
-                          Colors.blue.withOpacity(0.1),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: Colors.purple.withOpacity(0.2),
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: Colors.purple.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(
-                            Icons.psychology,
-                            color: Colors.purple,
-                            size: 24,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Smart Insight',
-                                style: GoogleFonts.inter(
-                                  color: primaryColor,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Your food expenses increased by 15% this month. Consider meal planning to save more!',
-                                style: GoogleFonts.inter(
-                                  color: textSecondary,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
 
                   const SizedBox(height: 32),
 
