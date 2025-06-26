@@ -50,7 +50,6 @@ class StatisticsState extends State<Statistics> with TickerProviderStateMixin {
   late Animation<Offset> _slideAnimation;
   var budget = 10000.0;
   final List<String> categories = [
-    'All',
     'Food',
     'Shopping',
     'Bills',
@@ -172,12 +171,13 @@ class StatisticsState extends State<Statistics> with TickerProviderStateMixin {
               borderRadius: BorderRadius.circular(responsiveWidth(22)),
               child: InkWell(
                 borderRadius: BorderRadius.circular(responsiveWidth(22)),
-                onTap: () => Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AddExpenseScreen(),
-                  ),
-                ),
+                onTap:
+                    () => Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AddExpenseScreen(),
+                      ),
+                    ),
                 child: Icon(
                   Icons.arrow_back_ios_rounded,
                   color: primaryColor,
@@ -237,7 +237,35 @@ class StatisticsState extends State<Statistics> with TickerProviderStateMixin {
                             SizedBox(width: responsiveWidth(12)),
                             Text(
                               'Update Budget',
-                              style: TextStyle(
+                              style: GoogleFonts.inter(
+                                color: primaryColor,
+                                fontSize: responsiveText(14),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    PopupMenuItem<String>(
+                      value: 'Update Income',
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          vertical: responsiveHeight(8),
+                          horizontal: responsiveWidth(12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.visibility_rounded,
+                              color: primaryColor,
+                              size: responsiveText(18),
+                            ),
+                            SizedBox(width: responsiveWidth(12)),
+                            Text(
+                              'View Budget',
+                              style: GoogleFonts.inter(
                                 color: primaryColor,
                                 fontSize: responsiveText(14),
                                 fontWeight: FontWeight.w500,
@@ -719,7 +747,7 @@ class StatisticsState extends State<Statistics> with TickerProviderStateMixin {
         primaryColor: primaryColor,
         cardColor: cardColor,
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        ),
+      ),
     );
   }
 }
