@@ -7,7 +7,7 @@ const app = express();
 app.use(express.json()); // to parse JSON
 
 // Prediction route
-const predictRoute = require('./routes/predict');
+const predictRoute = require('./predict');
 app.use('/api/predict', predictRoute);
 
 // MongoDB connection
