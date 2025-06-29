@@ -1,11 +1,10 @@
 from flask import Flask, request, jsonify
-import joblib  # or pickle if you're using that
-import sklearn  # just to ensure compatibility if needed
+import joblib  
+import sklearn  
 import numpy as np
 
-# Load your trained model and vectorizer
 model = joblib.load("model/category_model.pkl")
-vectorizer = joblib.load("model/vectorizer.pkl")  # if used
+vectorizer = joblib.load("model/vectorizer.pkl")  
 
 app = Flask(__name__)
 

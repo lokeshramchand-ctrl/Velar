@@ -1,62 +1,4 @@
 
-/*const express = require("express");
-const cors = require("cors");
-const dotenv = require("dotenv");
-const connectDB = require("../config/db");
-const http = require("http");
-const TransRoutes = require("./routes/")
-dotenv.config();
-const app = express();
-const server = http.createServer(app); // Pass `app` to `http.createServer`
-
-// Connect Database
-connectDB();
-// Middleware
-app.use(express.json());
-app.use(cors());
-
-// Routes
-app.use("/api/transactions", TransRoutes);
-
-// Start Server
-const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
-});
-*/
-/*
-const express = require('express');
-const mongoose = require('mongoose');
-const app = express();
-app.use(express.json()); // to parse JSON
-const predictRoute = require('./routes/predict');
-app.use('/api/predict', predictRoute);
-mongoose.connect('mongodb://localhost:27017/chat', { useNewUrlParser: true, useUnifiedTopology: true });
-
-// Define schema and model
-const transactionSchema = new mongoose.Schema({
-  description: String,
-  amount: Number,
-  date: { type: Date, default: Date.now },
-});
-
-const Transaction = mongoose.model('Transaction', transactionSchema);
-
-// POST endpoint to add transaction
-app.post('/api/transaction/add', async (req, res) => {
-  try {
-    const newTransaction = new Transaction(req.body);
-    await newTransaction.save();
-    res.status(200).json({ message: 'Transaction saved', data: newTransaction });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.listen(3000, () => {
-  console.log('Server running on port 3000');
-});
-*/
 const express = require('express');
 const mongoose = require('mongoose');
 const axios = require('axios');
@@ -79,7 +21,7 @@ const transactionSchema = new mongoose.Schema({
   description: String,
   amount: Number,
 
-  category: String, // 👈 added category
+  category: String,
   date: { type: Date, default: Date.now },
 });
 

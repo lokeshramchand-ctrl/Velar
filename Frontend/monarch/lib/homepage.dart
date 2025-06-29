@@ -552,7 +552,6 @@ class _FinTrackHomePageState extends State<FinTrackHomePage>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -561,15 +560,6 @@ class _FinTrackHomePageState extends State<FinTrackHomePage>
                         children: [
                           Text(
                             'Good Morning! 👋',
-                            style: GoogleFonts.inter(
-                              color: textSecondary,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Alex Johnson',
                             style: GoogleFonts.inter(
                               color: primaryColor,
                               fontSize: 24,

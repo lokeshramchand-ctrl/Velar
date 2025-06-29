@@ -48,7 +48,6 @@ class StatisticsState extends State<Statistics> with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
-  var budget = 10000.0;
   final List<String> categories = [
     'Food',
     'Shopping',
@@ -304,6 +303,7 @@ class StatisticsState extends State<Statistics> with TickerProviderStateMixin {
     );
   }
 
+  var budget = 10000.0 > 0 ? 10000.0 : 0.0;
   Widget _buildTotalSpentCard() {
     final totalSpent = transactions.fold<double>(
       0,
