@@ -7,7 +7,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:monarch/add.dart';
-import 'package:monarch/budget.dart';
+import 'package:monarch/update_budget.dart';
 import 'package:monarch/budget_manager.dart';
 import 'package:monarch/homepage.dart';
 import 'package:monarch/navbar.dart';
@@ -203,7 +203,7 @@ class StatisticsState extends State<Statistics> with TickerProviderStateMixin {
               onSelected: (String value) async {
                 final updatedBudget = await Navigator.push<double>(
                   context,
-                  MaterialPageRoute(builder: (context) => const BudgetScreen()),
+                  MaterialPageRoute(builder: (context) => const UpdateBudget()),
                 );
                 if (updatedBudget != null) {
                   setState(() => budget = updatedBudget);

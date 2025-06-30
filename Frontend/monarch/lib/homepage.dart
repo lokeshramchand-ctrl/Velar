@@ -1,13 +1,14 @@
 // ignore_for_file: deprecated_member_use, unused_local_variable, use_super_parameters, avoid_print
 
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart' as http;
-import 'package:monarch/add.dart';
+import 'package:monarch/colors.dart';
+import 'package:monarch/fetch_service.dart';
+import 'package:monarch/hero_card.dart';
 import 'package:monarch/navbar.dart';
+import 'package:monarch/quick_actions.dart';
+import 'package:monarch/transcations_recent.dart';
 //import 'package:monarch/static.dart';
 
 class FinTrackHomePage extends StatefulWidget {
@@ -20,15 +21,9 @@ class FinTrackHomePage extends StatefulWidget {
 class _FinTrackHomePageState extends State<FinTrackHomePage>
     with TickerProviderStateMixin {
   // Modern color palette
-  final Color backgroundColor = const Color(0xFFF8F9FA); // Light cream/white
-  final Color primaryColor = const Color(0xFF2D3436); // Deep charcoal
-  final Color accentColor = const Color(0xFF00B894); // Emerald green
-  final Color cardColor = const Color(0xFFFFFFFF); // Pure white
-  final Color textSecondary = const Color(0xFF636E72); // Muted gray
-  final Color surfaceColor = const Color(0xFFF1F2F6); // Light surface
 
   // List to hold recent transactions
-  List<Map<String, dynamic>> recentTransactions = [];
+
 
   late AnimationController _fadeController;
   late AnimationController _slideController;
@@ -36,33 +31,14 @@ class _FinTrackHomePageState extends State<FinTrackHomePage>
   late Animation<Offset> _slideAnimation;
 
   // Sample data for dashboard
-  final double totalBalance = 5847.32;
-  final double monthlyIncome = 8500.00;
-  final double monthlyExpenses = 2652.68;
-  
-
- 
-  Future<void> fetchRecentTransactions() async {
-  final response = await http.get(
-    Uri.parse('http://192.168.1.9:3000/api/transactions/recent'),
-  );
-
-  if (response.statusCode == 200) {
-    final List<dynamic> data = jsonDecode(response.body)['data'];
-
-    setState(() {
-      recentTransactions = List<Map<String, dynamic>>.from(data);
-    });
-  } else {
-    print('Failed to load recent transactions');
-  }
-}
-
 
   @override
   void initState() {
     super.initState();
-fetchRecentTransactions();
+    fetchRecentTransactions().then((transactions) {
+      // Do something with the transactions
+    });
+
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 1200),
       vsync: this,
@@ -96,327 +72,6 @@ fetchRecentTransactions();
     _slideController.dispose();
     super.dispose();
   }
-
-  Widget _buildBalanceCard() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [accentColor, accentColor.withOpacity(0.8)],
-        ),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: accentColor.withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Total Balance',
-                style: GoogleFonts.inter(
-                  color: Colors.white.withOpacity(0.9),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Icon(
-                Icons.visibility_outlined,
-                color: Colors.white.withOpacity(0.9),
-                size: 20,
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '\$${totalBalance.toStringAsFixed(2)}',
-            style: GoogleFonts.inter(
-              color: Colors.white,
-              fontSize: 36,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -1,
-            ),
-          ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Income',
-                      style: GoogleFonts.inter(
-                        color: Colors.white.withOpacity(0.8),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '\$${monthlyIncome.toStringAsFixed(0)}',
-                      style: GoogleFonts.inter(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                width: 1,
-                height: 40,
-                color: Colors.white.withOpacity(0.3),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Expenses',
-                        style: GoogleFonts.inter(
-                          color: Colors.white.withOpacity(0.8),
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '\$${monthlyExpenses.toStringAsFixed(0)}',
-                        style: GoogleFonts.inter(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQuickActions() {
-    return Row(
-      children: [
-        Expanded(
-          child: GestureDetector(
-            onTap: () {
-              HapticFeedback.heavyImpact();
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const AddExpenseScreen(),
-                ),
-              );
-            },
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: cardColor,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: primaryColor.withOpacity(0.08),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: accentColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(Icons.add, color: accentColor, size: 24),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Add Expense',
-                    style: GoogleFonts.inter(
-                      color: primaryColor,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: GestureDetector(
-            onTap: () {
-              HapticFeedback.lightImpact();
-              // Navigate to Statistics
-            },
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: cardColor,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: primaryColor.withOpacity(0.08),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.bar_chart,
-                      color: Colors.blue,
-                      size: 24,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Statistics',
-                    style: GoogleFonts.inter(
-                      color: primaryColor,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-Widget _buildRecentTransactions() {
-  return Container(
-    padding: const EdgeInsets.all(20),
-    decoration: BoxDecoration(
-      color: cardColor,
-      borderRadius: BorderRadius.circular(20),
-      boxShadow: [
-        BoxShadow(
-          color: primaryColor.withOpacity(0.08),
-          blurRadius: 10,
-          offset: const Offset(0, 4),
-        ),
-      ],
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Recent Transactions',
-              style: GoogleFonts.inter(
-                color: primaryColor,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            Text(
-              'View All',
-              style: GoogleFonts.inter(
-                color: accentColor,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        ...recentTransactions.map(
-          (transaction) => Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: Row(
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: accentColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.shopping_bag, // You can customize based on category
-                    color: accentColor,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        transaction['description'] ?? '',
-                        style: GoogleFonts.inter(
-                          color: primaryColor,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '${transaction['category']} • ${DateTime.parse(transaction['date']).toLocal().toString().split(' ')[0]}',
-                        style: GoogleFonts.inter(
-                          color: textSecondary,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Text(
-                  '₹${transaction['amount'].toStringAsFixed(2)}',
-                  style: GoogleFonts.inter(
-                    color: transaction['amount'] >= 0 ? accentColor : Colors.red,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-
 
   int _selectedIndex = 0;
 
@@ -465,24 +120,17 @@ Widget _buildRecentTransactions() {
                       ),
                     ],
                   ),
-
-                  const SizedBox(height: 32),
-
-                  // Balance Card
-                  _buildBalanceCard(),
-
+                  const SizedBox(height: 16),
+                  const BalanceCardPage(),
+                  const SizedBox(height: 24),
+                  QuickActionsPage(),
+                  const SizedBox(height: 24),
+                  RecentTransactionsWidget(
+                    recentTransactions: fetchRecentTransactions(),
+                  ),
                   const SizedBox(height: 24),
 
-                  // Quick Actions
-                  _buildQuickActions(),
-
                   const SizedBox(height: 32),
-
-                  // Recent Transactions
-                  _buildRecentTransactions(),
-
-            
-                  const SizedBox(height: 20),
                 ],
               ),
             ),

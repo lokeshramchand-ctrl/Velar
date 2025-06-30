@@ -92,6 +92,28 @@ app.get('/api/transactions', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+// Get 5 most recent transactions
+app.get('/api/transactions/recent', async (req, res) => {
+  try {
+    const transactions = await Transaction.find({})
+      .sort({ date: -1 })
+      .limit(5); // 👈 limit to 5
+
+    res.status(200).json({
+      success: true,
+      data: transactions.map(tx => ({
+        id: tx._id,
+        description: tx.description,
+        amount: tx.amount,
+        category: tx.category,
+        date: tx.date,
+      })),
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 // Start server
 app.listen(3000, () => {

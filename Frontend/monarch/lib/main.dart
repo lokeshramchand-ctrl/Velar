@@ -4,10 +4,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:monarch/budget.dart';
+import 'package:monarch/update_budget.dart';
 import 'package:monarch/homepage.dart';
 //import 'package:monarch/homepage.dart';
-import 'package:monarch/static.dart';
+import 'package:monarch/statistics.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized(); // This fixes the issue

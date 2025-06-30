@@ -3,28 +3,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:monarch/static.dart';
+import 'package:monarch/colors.dart';
+import 'package:monarch/statistics.dart';
 
-class BudgetScreen extends StatefulWidget {
-  const BudgetScreen({super.key});
+class UpdateBudget extends StatefulWidget {
+  const UpdateBudget({super.key});
 
   @override
-  State<BudgetScreen> createState() => _BudgetScreenState();
+  State<UpdateBudget> createState() => _UpdateBudgetState();
 }
 
-class _BudgetScreenState extends State<BudgetScreen>
+class _UpdateBudgetState extends State<UpdateBudget>
     with TickerProviderStateMixin {
   // Constants and Controllers
   static const _animationDuration = Duration(milliseconds: 600);
   static const _fadeDuration = Duration(milliseconds: 800);
 
-  // Color Scheme
-  final Color backgroundColor = const Color(0xFFF8F9FA);
-  final Color primaryColor = const Color(0xFF2D3436);
-  final Color accentColor = const Color(0xFF00B894);
-  final Color cardColor = const Color(0xFFFFFFFF);
-  final Color textSecondary = const Color(0xFF636E72);
-  final Color surfaceColor = const Color(0xFFF1F2F6);
 
   // Controllers and Focus Nodes
   final TextEditingController amountController = TextEditingController();

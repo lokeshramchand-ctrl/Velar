@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:monarch/add.dart';
 import 'package:monarch/homepage.dart';
-import 'package:monarch/static.dart';
+import 'package:monarch/statistics.dart';
 
 class CustomNavBar extends StatelessWidget {
   final int currentIndex;
