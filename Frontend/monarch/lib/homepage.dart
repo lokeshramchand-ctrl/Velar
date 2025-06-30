@@ -1,8 +1,11 @@
-// ignore_for_file: deprecated_member_use, unused_local_variable, use_super_parameters
+// ignore_for_file: deprecated_member_use, unused_local_variable, use_super_parameters, avoid_print
+
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 import 'package:monarch/add.dart';
 import 'package:monarch/navbar.dart';
 //import 'package:monarch/static.dart';
@@ -24,6 +27,9 @@ class _FinTrackHomePageState extends State<FinTrackHomePage>
   final Color textSecondary = const Color(0xFF636E72); // Muted gray
   final Color surfaceColor = const Color(0xFFF1F2F6); // Light surface
 
+  // List to hold recent transactions
+  List<Map<String, dynamic>> recentTransactions = [];
+
   late AnimationController _fadeController;
   late AnimationController _slideController;
   late Animation<double> _fadeAnimation;
@@ -33,72 +39,30 @@ class _FinTrackHomePageState extends State<FinTrackHomePage>
   final double totalBalance = 5847.32;
   final double monthlyIncome = 8500.00;
   final double monthlyExpenses = 2652.68;
-  final List<Map<String, dynamic>> recentTransactions = [
-    {
-      'title': 'Grocery Shopping',
-      'category': 'Food & Dining',
-      'amount': -128.50,
-      'date': 'Today',
-      'icon': Icons.shopping_cart,
-      'color': Colors.orange,
-    },
-    {
-      'title': 'Salary Credit',
-      'category': 'Income',
-      'amount': 8500.00,
-      'date': 'Yesterday',
-      'icon': Icons.account_balance_wallet,
-      'color': Colors.green,
-    },
-    {
-      'title': 'Netflix Subscription',
-      'category': 'Entertainment',
-      'amount': -15.99,
-      'date': '2 days ago',
-      'icon': Icons.play_circle,
-      'color': Colors.red,
-    },
-    {
-      'title': 'Coffee Shop',
-      'category': 'Food & Dining',
-      'amount': -4.75,
-      'date': '3 days ago',
-      'icon': Icons.local_cafe,
-      'color': Colors.brown,
-    },
-  ];
+  
 
-  final List<Map<String, dynamic>> categories = [
-    {
-      'name': 'Food & Dining',
-      'amount': 450.32,
-      'percentage': 28,
-      'color': Colors.orange,
-    },
-    {
-      'name': 'Transportation',
-      'amount': 320.15,
-      'percentage': 20,
-      'color': Colors.blue,
-    },
-    {
-      'name': 'Entertainment',
-      'amount': 180.50,
-      'percentage': 11,
-      'color': Colors.purple,
-    },
-    {
-      'name': 'Shopping',
-      'amount': 275.80,
-      'percentage': 17,
-      'color': Colors.pink,
-    },
-  ];
+ 
+  Future<void> fetchRecentTransactions() async {
+  final response = await http.get(
+    Uri.parse('http://192.168.1.9:3000/api/transactions/recent'),
+  );
+
+  if (response.statusCode == 200) {
+    final List<dynamic> data = jsonDecode(response.body)['data'];
+
+    setState(() {
+      recentTransactions = List<Map<String, dynamic>>.from(data);
+    });
+  } else {
+    print('Failed to load recent transactions');
+  }
+}
+
 
   @override
   void initState() {
     super.initState();
-
+fetchRecentTransactions();
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 1200),
       vsync: this,
@@ -353,188 +317,106 @@ class _FinTrackHomePageState extends State<FinTrackHomePage>
     );
   }
 
-  Widget _buildRecentTransactions() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: primaryColor.withOpacity(0.08),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Recent Transactions',
-                style: GoogleFonts.inter(
-                  color: primaryColor,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              Text(
-                'View All',
-                style: GoogleFonts.inter(
-                  color: accentColor,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          ...recentTransactions.map(
-            (transaction) => Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Row(
-                children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: transaction['color'].withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      transaction['icon'],
-                      color: transaction['color'],
-                      size: 20,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          transaction['title'],
-                          style: GoogleFonts.inter(
-                            color: primaryColor,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${transaction['category']} • ${transaction['date']}',
-                          style: GoogleFonts.inter(
-                            color: textSecondary,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Text(
-                    '${transaction['amount'] > 0 ? '+' : ''}\$${transaction['amount'].abs().toStringAsFixed(2)}',
-                    style: GoogleFonts.inter(
-                      color:
-                          transaction['amount'] > 0 ? accentColor : Colors.red,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
+Widget _buildRecentTransactions() {
+  return Container(
+    padding: const EdgeInsets.all(20),
+    decoration: BoxDecoration(
+      color: cardColor,
+      borderRadius: BorderRadius.circular(20),
+      boxShadow: [
+        BoxShadow(
+          color: primaryColor.withOpacity(0.08),
+          blurRadius: 10,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Recent Transactions',
+              style: GoogleFonts.inter(
+                color: primaryColor,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSpendingCategories() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: primaryColor.withOpacity(0.08),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Spending by Category',
-            style: GoogleFonts.inter(
-              color: primaryColor,
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
+            Text(
+              'View All',
+              style: GoogleFonts.inter(
+                color: accentColor,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          ),
-          const SizedBox(height: 20),
-          ...categories.map(
-            (category) => Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          ],
+        ),
+        const SizedBox(height: 16),
+        ...recentTransactions.map(
+          (transaction) => Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: accentColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.shopping_bag, // You can customize based on category
+                    color: accentColor,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 12,
-                            height: 12,
-                            decoration: BoxDecoration(
-                              color: category['color'],
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            category['name'],
-                            style: GoogleFonts.inter(
-                              color: primaryColor,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
                       Text(
-                        '\$${category['amount'].toStringAsFixed(2)}',
+                        transaction['description'] ?? '',
                         style: GoogleFonts.inter(
                           color: primaryColor,
-                          fontSize: 14,
+                          fontSize: 15,
                           fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${transaction['category']} • ${DateTime.parse(transaction['date']).toLocal().toString().split(' ')[0]}',
+                        style: GoogleFonts.inter(
+                          color: textSecondary,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  LinearProgressIndicator(
-                    value: category['percentage'] / 100,
-                    backgroundColor: surfaceColor,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      category['color'],
-                    ),
-                    borderRadius: BorderRadius.circular(4),
+                ),
+                Text(
+                  '₹${transaction['amount'].toStringAsFixed(2)}',
+                  style: GoogleFonts.inter(
+                    color: transaction['amount'] >= 0 ? accentColor : Colors.red,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
+
+
 
   int _selectedIndex = 0;
 
@@ -599,11 +481,7 @@ class _FinTrackHomePageState extends State<FinTrackHomePage>
                   // Recent Transactions
                   _buildRecentTransactions(),
 
-                  const SizedBox(height: 24),
-
-                  // Spending Categories
-                  _buildSpendingCategories(),
-
+            
                   const SizedBox(height: 20),
                 ],
               ),
