@@ -1,7 +1,7 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
-import 'package:monarch/add.dart';
+import 'package:monarch/add_expense.dart';
 import 'package:monarch/homepage.dart';
 import 'package:monarch/statistics.dart';
 

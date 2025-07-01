@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:monarch/colors.dart';
+import 'package:monarch/utils/overall_colors.dart';
 import 'package:monarch/statistics.dart';
 
 class UpdateBudget extends StatefulWidget {

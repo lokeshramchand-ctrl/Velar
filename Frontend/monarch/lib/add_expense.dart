@@ -1,12 +1,12 @@
 // ignore_for_file: use_build_context_synchronously, deprecated_member_use
 
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart' as http;
+import 'package:monarch/utils/overall_colors.dart';
+import 'package:monarch/data/services/transcation_add.dart';
 import 'package:monarch/statistics.dart';
+import 'package:monarch/utils/custom_snack_bar.dart';
 
 class AddExpenseScreen extends StatefulWidget {
   const AddExpenseScreen({super.key});
@@ -18,12 +18,6 @@ class AddExpenseScreen extends StatefulWidget {
 class _AddExpenseScreenState extends State<AddExpenseScreen>
     with TickerProviderStateMixin {
   // Modern color palette inspired by the image
-  final Color backgroundColor = const Color(0xFFF8F9FA); // Light cream/white
-  final Color primaryColor = const Color(0xFF2D3436); // Deep charcoal
-  final Color accentColor = const Color(0xFF00B894); // Emerald green
-  final Color cardColor = const Color(0xFFFFFFFF); // Pure white
-  final Color textSecondary = const Color(0xFF636E72); // Muted gray
-  final Color surfaceColor = const Color(0xFFF1F2F6); // Light surface
 
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController amountController = TextEditingController();
@@ -104,7 +98,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
     // Ensure only one decimal point
     List<String> parts = cleanValue.split('.');
     if (parts.length > 2) {
-      cleanValue = '₹{parts[0]}.₹{parts.sublist(1).join('')}';
+      cleanValue =
+          '₹{parts[0]}.₹{parts.sublist(1).join('
+          ')}';
     }
 
     if (cleanValue.isNotEmpty) {
@@ -174,164 +170,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
     );
   }
 
-  Future<void> addTransaction() async {
-    // Validation first
-    if (descriptionController.text.trim().isEmpty ||
-        amountController.text.trim().isEmpty) {
-      _showCustomSnackBar(
-        message: 'Please fill in both name and amount',
-        icon: Icons.warning_rounded,
-        backgroundColor: const Color(0xFFFF6B6B),
-        iconColor: Colors.white,
-      );
-      return;
-    }
-
-    // Show beautiful loading indicator
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder:
-          (_) => Center(
-            child: Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: cardColor,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: primaryColor.withOpacity(0.1),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(accentColor),
-                    strokeWidth: 3,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Processing transaction...',
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: primaryColor,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-    );
-
-    try {
-      final response = await http.post(
-        Uri.parse('http://192.168.1.9:3000/api/transaction/add'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'description': descriptionController.text,
-          'amount': double.tryParse(amountController.text),
-        }),
-      );
-
-      Navigator.of(context).pop(); // Close loading dialog
-
-      if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
-        final predictedCategory = responseData['data']['category'];
-
-        // Clear the input fields
-        descriptionController.clear();
-        amountController.clear();
-        setState(() {
-          _displayAmount = '';
-        });
-
-        // Show success message
-        _showCustomSnackBar(
-          message:
-              'Transaction added successfully!\nCategorized as: $predictedCategory',
-          icon: Icons.check_circle_rounded,
-          backgroundColor: accentColor,
-          iconColor: Colors.white,
-          duration: const Duration(seconds: 2),
-        );
-
-        // Navigate back to statistics page after a short delay
-        Future.delayed(const Duration(milliseconds: 1500), () {
-          if (mounted) {
-            Navigator.of(context).pop(); // Go back to previous screen
-          }
-        });
-      } else {
-        _showCustomSnackBar(
-          message: 'Failed to add transaction\nPlease try again',
-          icon: Icons.error_rounded,
-          backgroundColor: const Color(0xFFFF6B6B),
-          iconColor: Colors.white,
-        );
-      }
-    } catch (e) {
-      Navigator.of(context).pop(); // Close loading dialog
-      _showCustomSnackBar(
-        message: 'Network error occurred\nPlease check your connection',
-        icon: Icons.wifi_off_rounded,
-        backgroundColor: const Color(0xFFFF9F43),
-        iconColor: Colors.white,
-      );
-    }
-  }
-
-  void _showCustomSnackBar({
-    required String message,
-    required IconData icon,
-    required Color backgroundColor,
-    required Color iconColor,
-    Duration duration = const Duration(seconds: 3),
-  }) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Container(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(icon, color: iconColor, size: 20),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  message,
-                  style: GoogleFonts.inter(
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white,
-                    fontSize: 14,
-                    height: 1.4,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        backgroundColor: backgroundColor,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: const EdgeInsets.all(16),
-        duration: duration,
-        elevation: 8,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -343,7 +181,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
             opacity: _fadeAnimation,
             child: Column(
               children: [
-                // Header
                 Padding(
                   padding: const EdgeInsets.all(20),
                   child: Row(
@@ -566,7 +403,31 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
 
                           // Add Expense Button
                           GestureDetector(
-                            onTap: addTransaction,
+                            onTap: () {
+                              TransactionApi.addTransaction(
+                                context,
+                                descriptionController.text,
+                                amountController.text,
+                                () {
+                                  // Clear the input fields
+                                  descriptionController.clear();
+                                  amountController.clear();
+                                  setState(() {
+                                    _displayAmount = '';
+                                  });
+                                },
+                                () {
+                                  showCustomSnackBar(
+                                    context: context,
+                                    message:
+                                        'Failed to add transaction\nPlease try again',
+                                    icon: Icons.error_rounded,
+                                    backgroundColor: const Color(0xFFFF6B6B),
+                                    iconColor: Colors.white,
+                                  );
+                                },
+                              );
+                            },
                             child: Container(
                               width: double.infinity,
                               height: 60,

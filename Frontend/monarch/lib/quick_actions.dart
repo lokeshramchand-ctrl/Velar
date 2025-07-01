@@ -3,8 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:monarch/add.dart';
-import 'package:monarch/colors.dart';
+import 'package:monarch/add_expense.dart';
+import 'package:monarch/utils/overall_colors.dart';
 
 class QuickActionsPage extends StatelessWidget {
   const QuickActionsPage({super.key});

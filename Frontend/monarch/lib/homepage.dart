@@ -3,8 +3,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:monarch/colors.dart';
-import 'package:monarch/fetch_service.dart';
+import 'package:monarch/utils/overall_colors.dart';
+import 'package:monarch/data/services/homepage_fetch_all_transcations_service.dart';
 import 'package:monarch/hero_card.dart';
 import 'package:monarch/navbar.dart';
 import 'package:monarch/quick_actions.dart';
@@ -20,17 +20,12 @@ class FinTrackHomePage extends StatefulWidget {
 
 class _FinTrackHomePageState extends State<FinTrackHomePage>
     with TickerProviderStateMixin {
-  // Modern color palette
-
-  // List to hold recent transactions
-
-
+ 
   late AnimationController _fadeController;
   late AnimationController _slideController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
 
-  // Sample data for dashboard
 
   @override
   void initState() {
