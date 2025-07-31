@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:monarch/colors.dart';
+import 'package:monarch/other_pages/colors.dart';
   final double totalBalance = 5847.32;
   final double monthlyIncome = 8500.00;
   final double monthlyExpenses = 2652.68;

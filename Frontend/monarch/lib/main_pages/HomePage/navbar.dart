@@ -1,9 +1,9 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
-import 'package:monarch/add.dart';
-import 'package:monarch/homepage.dart';
-import 'package:monarch/statistics.dart';
+import 'package:monarch/support/add.dart';
+import 'package:monarch/main_pages/HomePage/homepage.dart';
+import 'package:monarch/main_pages/Statistics/statistics.dart';
 
 class CustomNavBar extends StatelessWidget {
   final int currentIndex;

@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:monarch/colors.dart';
+import 'package:monarch/other_pages/colors.dart';
 
 class RecentTransactionsWidget extends StatelessWidget {
   final Future<List<Map<String, dynamic>>> recentTransactions;

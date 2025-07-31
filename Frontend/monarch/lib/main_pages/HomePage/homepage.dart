@@ -3,12 +3,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:monarch/colors.dart';
-import 'package:monarch/fetch_service.dart';
-import 'package:monarch/hero_card.dart';
-import 'package:monarch/navbar.dart';
-import 'package:monarch/quick_actions.dart';
-import 'package:monarch/transcations_recent.dart';
+import 'package:monarch/other_pages/colors.dart';
+import 'package:monarch/support/fetch_service.dart';
+import 'package:monarch/main_pages/HomePage/hero_card.dart';
+import 'package:monarch/main_pages/HomePage/navbar.dart';
+import 'package:monarch/main_pages/HomePage/quick_actions.dart';
+import 'package:monarch/support/transcations_recent.dart';
 //import 'package:monarch/static.dart';
 
 class FinTrackHomePage extends StatefulWidget {

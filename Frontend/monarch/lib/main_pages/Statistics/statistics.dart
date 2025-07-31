@@ -7,12 +7,12 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
-import 'package:monarch/add.dart';
-import 'package:monarch/enviroment.dart';
-import 'package:monarch/update_budget.dart';
-import 'package:monarch/budget_manager.dart';
-import 'package:monarch/homepage.dart';
-import 'package:monarch/navbar.dart';
+import 'package:monarch/support/add.dart';
+import 'package:monarch/other_pages/enviroment.dart';
+import 'package:monarch/main_pages/Statistics/update_budget.dart';
+import 'package:monarch/main_pages/Statistics/budget_manager.dart';
+import 'package:monarch/main_pages/HomePage/homepage.dart';
+import 'package:monarch/main_pages/HomePage/navbar.dart';
 
 class Transaction {
   final String description;

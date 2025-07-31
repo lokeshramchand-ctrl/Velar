@@ -7,8 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
-import 'package:monarch/enviroment.dart';
-import 'package:monarch/statistics.dart';
+import 'package:monarch/other_pages/enviroment.dart';
+import 'package:monarch/main_pages/Statistics/statistics.dart';
 
 class AddExpenseScreen extends StatefulWidget {
   const AddExpenseScreen({super.key});

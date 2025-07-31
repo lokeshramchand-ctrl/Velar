@@ -1,4 +1,4 @@
-require('dotenv').config(); // Add this at the very top
+require('dotenv').config(); 
 const express = require('express');
 const mongoose = require('mongoose');
 const axios = require('axios');
