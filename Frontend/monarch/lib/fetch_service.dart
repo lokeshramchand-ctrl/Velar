@@ -2,10 +2,11 @@
 
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
+import 'enviroment.dart';
 Future<List<Map<String, dynamic>>> fetchRecentTransactions() async {
   final response = await http.get(
-    Uri.parse('http://192.168.1.9:3000/api/transactions/recent'),
+
+    Uri.parse('${Environment.baseUrl}/api/transactions/recent'),
   );
 
   if (response.statusCode == 200) {

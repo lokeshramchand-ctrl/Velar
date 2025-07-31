@@ -4,9 +4,11 @@ import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:monarch/add.dart';
+import 'package:monarch/enviroment.dart';
 import 'package:monarch/update_budget.dart';
 import 'package:monarch/budget_manager.dart';
 import 'package:monarch/homepage.dart';
@@ -58,7 +60,6 @@ class StatisticsState extends State<Statistics> with TickerProviderStateMixin {
   ];
   String selectedCategory = 'All';
   Map<String, double> totalAmountPerCategory = {};
-
   // Color Scheme
   final Color backgroundColor = const Color(0xFFF8F9FA);
   final Color primaryColor = const Color(0xFF2D3436);
@@ -108,7 +109,9 @@ class StatisticsState extends State<Statistics> with TickerProviderStateMixin {
   Future<void> fetchTransactions({String category = 'All'}) async {
     setState(() => isLoading = true);
     try {
-      final uri = Uri.parse('http://192.168.1.9:3000/api/transactions').replace(
+      final uri = Uri.parse(
+        '${Environment.baseUrl}/api/transactions',
+      ).replace(
         queryParameters: category == 'All' ? null : {'category': category},
       );
       final response = await http.get(uri);

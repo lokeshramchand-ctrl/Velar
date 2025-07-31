@@ -4,8 +4,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:monarch/enviroment.dart';
 import 'package:monarch/statistics.dart';
 
 class AddExpenseScreen extends StatefulWidget {
@@ -104,7 +106,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
     // Ensure only one decimal point
     List<String> parts = cleanValue.split('.');
     if (parts.length > 2) {
-      cleanValue = '₹{parts[0]}.₹{parts.sublist(1).join('')}';
+      cleanValue =
+          '₹{parts[0]}.₹{parts.sublist(1).join('
+          ')}';
     }
 
     if (cleanValue.isNotEmpty) {
@@ -173,6 +177,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
       ),
     );
   }
+  final baseUrl = dotenv.env['BASE_URL'];
 
   Future<void> addTransaction() async {
     // Validation first
@@ -230,7 +235,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
 
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.1.9:3000/api/transaction/add'),
+        Uri.parse('${Environment.baseUrl}/api/transaction/add'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'description': descriptionController.text,

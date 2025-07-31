@@ -1,11 +1,14 @@
-
+require('dotenv').config(); // Add this at the very top
 const express = require('express');
 const mongoose = require('mongoose');
 const axios = require('axios');
+const cors = require('cors');
 
 const app = express();
 app.use(express.json()); // to parse JSON
-
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || '*'
+}));
 // Prediction route
 const predictRoute = require('./predict');
 app.use('/api/predict', predictRoute);
@@ -33,7 +36,7 @@ app.post('/api/transaction/add', async (req, res) => {
     const { description, amount } = req.body;
 
     // Call your AI prediction endpoint
-    const predictRes = await axios.post('http://192.168.1.9:5000/api/predict', {
+    const predictRes = await axios.post('http://10.231.12.247:5000/api/predict', {
       description,
     });
 
@@ -114,8 +117,9 @@ app.get('/api/transactions/recent', async (req, res) => {
   }
 });
 
-
-// Start server
-app.listen(3000, () => {
-  console.log('🚀 Server running on port 3000');
+const HOST = process.env.HOST || '0.0.0.0';  // listen on all interfaces
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, HOST, () => {
+  console.log(`🚀 Server running on http://${HOST}:${PORT}`);
 });
+

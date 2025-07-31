@@ -3,16 +3,18 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:monarch/add.dart';
 import 'package:monarch/update_budget.dart';
 import 'package:monarch/homepage.dart';
-//import 'package:monarch/homepage.dart';
 import 'package:monarch/statistics.dart';
 
-void main() {
-  WidgetsFlutterBinding.ensureInitialized(); // This fixes the issue
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -37,6 +39,8 @@ class AddTransactionPage extends StatefulWidget {
 class _AddTransactionPageState extends State<AddTransactionPage> {
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController amountController = TextEditingController();
+  final baseUrl = dotenv.env['BASE_URL'];
+
   Future<void> addTransaction() async {
     // Show loading indicator
     showDialog(
@@ -47,7 +51,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.1.9:3000/api/transaction/add'),
+        Uri.parse('$baseUrl/api/transaction/add'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'description': descriptionController.text,
