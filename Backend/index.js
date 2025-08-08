@@ -40,7 +40,7 @@ app.post('/api/transaction/add', async (req, res) => {
     const { description, amount } = req.body;
 
     // Call your AI prediction endpoint
-    const predictRes = await axios.post('http://10.231.26.23:5000/api/predict', {
+    const predictRes = await axios.post('http://192.168.1.100:5000/api/predict', {
       description,
     });
 
@@ -144,7 +144,7 @@ app.post('/api/transactions/voice', async (req, res) => {
     const description = cleaned || 'misc';
 
     // Step 3: Predict category using your Flask API
-    const predictRes = await axios.post('http://10.231.26.23:5000/api/predict', {
+    const predictRes = await axios.post('http://192.168.1.100:5000/api/predict', {
       description,
     });
 

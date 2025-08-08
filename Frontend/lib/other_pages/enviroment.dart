@@ -1,3 +1,3 @@
 class Environment {
-  static const String baseUrl = 'http://10.231.26.23:3000';
+  static const String baseUrl = 'http://192.168.1.100:3000';
 }
