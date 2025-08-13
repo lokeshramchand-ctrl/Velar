@@ -1,3 +1,3 @@
 class Environment {
-  static const String baseUrl = 'velar-bja8e3ehbba3a5h9.southindia-01.azurewebsites.net';
+  static const String baseUrl = 'http://10.231.31.224:3000';
 }

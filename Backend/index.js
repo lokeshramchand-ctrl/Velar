@@ -13,12 +13,12 @@ app.use(cors({
 const predictRoute = require('./predict');
 app.use('/api/predict', predictRoute);
 
-// MongoDB connection
-mongoose.connect('mongodb+srv://velar:Lokesh%401234@cluster0.mplyn1q.mongodb.net/finance', {
+mongoose.connect('mongodb+srv://velar:Lokesh%401234@cluster0.mplyn1q.mongodb.net/finance?retryWrites=true&w=majority&ssl=true&appName=VelarApp', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-});
-
+})
+.then(() => console.log('MongoDB connected'))
+.catch(err => console.error('MongoDB connection error:', err));
 
 
 // Define schema and model
@@ -40,7 +40,7 @@ app.post('/api/transaction/add', async (req, res) => {
     const { description, amount } = req.body;
 
     // Call your AI prediction endpoint
-    const predictRes = await axios.post('http://192.168.1.100:5000/api/predict', {
+    const predictRes = await axios.post('http://10.231.31.224:5000/api/predict', {
       description,
     });
 
@@ -144,7 +144,7 @@ app.post('/api/transactions/voice', async (req, res) => {
     const description = cleaned || 'misc';
 
     // Step 3: Predict category using your Flask API
-    const predictRes = await axios.post('http://192.168.1.100:5000/api/predict', {
+    const predictRes = await axios.post('http://10.231.31.224:5000/api/predict', {
       description,
     });
 
