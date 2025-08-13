@@ -14,7 +14,7 @@ const predictRoute = require('./predict');
 app.use('/api/predict', predictRoute);
 
 // MongoDB connection
-mongoose.connect('mongodb://localhost:27017/chat', {
+mongoose.connect('mongodb+srv://velar:Lokesh%401234@cluster0.mplyn1q.mongodb.net/finance', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
