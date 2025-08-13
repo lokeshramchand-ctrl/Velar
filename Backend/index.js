@@ -13,7 +13,7 @@ app.use(cors({
 const predictRoute = require('./predict');
 app.use('/api/predict', predictRoute);
 
-mongoose.connect('mongodb+srv://velar:Lokesh%401234@cluster0.mplyn1q.mongodb.net/finance?retryWrites=true&w=majority&ssl=true&appName=VelarApp', {
+mongoose.connect(PROCESS.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
