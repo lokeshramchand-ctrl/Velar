@@ -13,7 +13,7 @@ app.use(cors({
 const predictRoute = require('./predict');
 app.use('/api/predict', predictRoute);
 
-mongoose.connect(PROCESS.env.MONGODB_URI, {
+mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })

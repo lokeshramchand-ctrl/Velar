@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'package:monarch/sppech.dart';
+import 'package:monarch/speech.dart';
 import 'package:monarch/support/add.dart';
 import 'package:monarch/main_pages/Statistics/update_budget.dart';
 import 'package:monarch/main_pages/HomePage/homepage.dart';
@@ -25,8 +25,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
       home: const FinTrackHomePage(),
+
       // home: const SpeechInputPage(),
-     
     );
   }
 }
