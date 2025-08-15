@@ -1,4 +1,4 @@
-// ignore_for_file: sort_child_properties_last, use_build_context_synchronously, deprecated_member_use, unnecessary_import, unused_local_variable, unused_import, sized_box_for_whitespace
+// ignore_for_file: sort_child_properties_last, use_build_context_synchronously, deprecated_member_use, unnecessary_import, unused_local_variable, unused_import, sized_box_for_whitespace, avoid_print
 
 import 'dart:convert';
 import 'dart:ui';
@@ -13,6 +13,7 @@ import 'package:monarch/main_pages/Statistics/update_budget.dart';
 import 'package:monarch/main_pages/Statistics/budget_manager.dart';
 import 'package:monarch/main_pages/HomePage/homepage.dart';
 import 'package:monarch/main_pages/HomePage/navbar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Transaction {
   final String description;
@@ -109,20 +110,42 @@ class StatisticsState extends State<Statistics> with TickerProviderStateMixin {
   Future<void> fetchTransactions({String category = 'All'}) async {
     setState(() => isLoading = true);
     try {
+      // 1. Get the saved userId from SharedPreferences or secure storage
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getString('userId');
+
+      if (userId == null) {
+        throw Exception('User ID not found. Please log in again.');
+      }
+
+      // 2. Build query parameters
+      final queryParams = {
+        'userId': userId,
+        if (category != 'All') 'category': category,
+      };
+
+      // 3. Build URI
       final uri = Uri.parse(
         '${Environment.baseUrl}/api/transactions',
-      ).replace(
-        queryParameters: category == 'All' ? null : {'category': category},
-      );
+      ).replace(queryParameters: queryParams);
+
+      // 4. Send GET request
       final response = await http.get(uri);
+      print('Request URL: $uri');
+      print('Status: ${response.statusCode}');
+      print('Body: ${response.body}');
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        final List<dynamic> list = data['data'];
+        final List<dynamic> list = data['data'] ?? [];
         final fetched = list.map((json) => Transaction.fromJson(json)).toList();
+
+        // Calculate totals
         final totals = <String, double>{};
         for (var tx in fetched) {
           totals[tx.category] = (totals[tx.category] ?? 0) + tx.amount;
         }
+
         setState(() {
           transactions = fetched;
           totalAmountPerCategory = totals;
@@ -132,7 +155,7 @@ class StatisticsState extends State<Statistics> with TickerProviderStateMixin {
       }
     } catch (e) {
       _showCustomSnackBar(
-        message: 'Error fetching transactions',
+        message: 'Error fetching transactions: ${e.toString()}',
         icon: Icons.data_exploration_rounded,
         backgroundColor: const Color(0xFFFF9F43),
         iconColor: Colors.white,
