@@ -56,7 +56,6 @@ class _EmailsScreenState extends State<EmailsScreen> {
       });
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
