@@ -1,4 +1,10 @@
 *.env
+
 *.md
 
 
+# Ignore dotenv config
+Backend/.env
+
+# Ignore Dart environment file
+Frontend/lib/other_pages/enviroment.dart
