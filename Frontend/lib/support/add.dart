@@ -9,6 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:monarch/other_pages/colors.dart';
 import 'package:monarch/other_pages/enviroment.dart';
 import 'package:monarch/main_pages/Statistics/statistics.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AddExpenseScreen extends StatefulWidget {
   const AddExpenseScreen({super.key});
@@ -19,8 +20,6 @@ class AddExpenseScreen extends StatefulWidget {
 
 class _AddExpenseScreenState extends State<AddExpenseScreen>
     with TickerProviderStateMixin {
-
-
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController amountController = TextEditingController();
   final FocusNode _nameFocus = FocusNode();
@@ -173,7 +172,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
   }
 
   Future<void> addTransaction() async {
-    // Validation first
+    // Validation
     if (descriptionController.text.trim().isEmpty ||
         amountController.text.trim().isEmpty) {
       _showCustomSnackBar(
@@ -185,7 +184,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
       return;
     }
 
-    // Show beautiful loading indicator
+    // Show loading dialog
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -227,12 +226,29 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
     );
 
     try {
+      //  🔹 Get stored userId
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getString('userId');
+
+      if (userId == null) {
+        Navigator.of(context).pop();
+        _showCustomSnackBar(
+          message: 'User not logged in — please log in again',
+          icon: Icons.error_rounded,
+          backgroundColor: const Color(0xFFFF6B6B),
+          iconColor: Colors.white,
+        );
+        return;
+      }
+
+      // Send POST request including userId
       final response = await http.post(
         Uri.parse('${Environment.baseUrl}/api/transaction/add'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'description': descriptionController.text,
           'amount': double.tryParse(amountController.text),
+          'userId': userId, // ✅ add user ID here
         }),
       );
 
@@ -242,14 +258,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
         final responseData = json.decode(response.body);
         final predictedCategory = responseData['data']['category'];
 
-        // Clear the input fields
         descriptionController.clear();
         amountController.clear();
-        setState(() {
-          _displayAmount = '';
-        });
+        setState(() => _displayAmount = '');
 
-        // Show success message
         _showCustomSnackBar(
           message:
               'Transaction added successfully!\nCategorized as: $predictedCategory',
@@ -259,11 +271,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
           duration: const Duration(seconds: 2),
         );
 
-        // Navigate back to statistics page after a short delay
+        // Optionally refresh statistics screen
         Future.delayed(const Duration(milliseconds: 1500), () {
-          if (mounted) {
-            Navigator.of(context).pop(); // Go back to previous screen
-          }
+          if (mounted) Navigator.of(context).pop();
         });
       } else {
         _showCustomSnackBar(
@@ -274,7 +284,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
         );
       }
     } catch (e) {
-      Navigator.of(context).pop(); // Close loading dialog
+      Navigator.of(context).pop();
       _showCustomSnackBar(
         message: 'Network error occurred\nPlease check your connection',
         icon: Icons.wifi_off_rounded,

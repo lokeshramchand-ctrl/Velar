@@ -42,6 +42,7 @@ dependencies:
   manual_speech_to_text: ^1.0.4
   permission_handler: ^11.4.0
   another_telephony: ^0.4.1
+  google_sign_in: ^6.2.1
 
 
 
