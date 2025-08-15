@@ -7,6 +7,7 @@ const passport = require('passport');
 const session = require('express-session');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const { OAuth2Client } = require('google-auth-library');
+const { google } = require('googleapis');
 
 const app = express();
 app.use(express.json());
@@ -202,6 +203,66 @@ app.get('/api/transactions/recent', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// Bank rules (can expand later)
+const bankRules = [
+  { name: 'HDFC Bank', email: 'alerts@hdfcbank.net' },
+  // { name: 'ICICI Bank', email: 'alerts@icicibank.com' }, // example expansion
+];
+
+// ✅ Gmail fetch function
+async function fetchBankEmails(accessToken, bankEmails) {
+  const oauth2Client = new google.auth.OAuth2();
+  oauth2Client.setCredentials({ access_token: accessToken });
+
+  const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
+
+  const allEmails = [];
+
+  for (const bankEmail of bankEmails) {
+    const res = await gmail.users.messages.list({
+      userId: 'me',
+      q: `from:${bankEmail}`,
+      maxResults: 20, // can adjust
+    });
+
+    const messages = res.data.messages || [];
+    for (const msg of messages) {
+      const fullMessage = await gmail.users.messages.get({
+        userId: 'me',
+        id: msg.id,
+      });
+
+      const snippet = fullMessage.data.snippet || "";
+      allEmails.push({
+        from: bankEmail,
+        snippet,
+      });
+    }
+  }
+
+  return allEmails;
+}
+
+// ✅ Gmail sync route
+app.post('/api/sync-gmail', async (req, res) => {
+  try {
+    const { accessToken } = req.body;
+
+    if (!accessToken) {
+      return res.status(400).json({ error: "Missing access token" });
+    }
+
+    const bankEmails = bankRules.map(b => b.email);
+    const emails = await fetchBankEmails(accessToken, bankEmails);
+
+    res.json({ success: true, emails });
+  } catch (error) {
+    console.error('❌ Gmail fetch error:', error);
+    res.status(500).json({ error: 'Failed to fetch Gmail messages' });
+  }
+});
+
 
 /* ---------- SERVER ---------- */
 mongoose.connect(process.env.MONGO_URI, {
