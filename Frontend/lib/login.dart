@@ -115,7 +115,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
-import 'package:monarch/email.dart';
+import 'package:monarch/emai_screen.dart';
+//import 'package:monarch/email.dart';
 import 'package:monarch/other_pages/enviroment.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -133,7 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
       'email',
       'profile',
       'openid',
-      'https://www.googleapis.com/auth/gmail.readonly'
+      'https://www.googleapis.com/auth/gmail.readonly',
     ],
     serverClientId: Environment.serverClientId,
   );
@@ -180,10 +181,11 @@ class _LoginScreenState extends State<LoginScreen> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (_) => EmailsScreen(
-                accessToken: accessToken,
-                userId: data['user']['_id'],
-              ),
+              // builder: (_) => EmailsScreen(
+              //   accessToken: accessToken,
+              //   userId: data['user']['_id'],
+              // ),
+              builder: (_) => AutoSyncEmailsScreen(accessToken: accessToken,userId: data['user']['_id'],),
             ),
           );
         } else {
@@ -204,29 +206,29 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
-        child: _isLoading
-            ? const CircularProgressIndicator()
-            : ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 12,
-                    horizontal: 20,
+        child:
+            _isLoading
+                ? const CircularProgressIndicator()
+                : ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 12,
+                      horizontal: 20,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                      side: const BorderSide(color: Colors.grey),
+                    ),
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    side: const BorderSide(color: Colors.grey),
+                  label: const Text(
+                    'Sign in with Google',
+                    style: TextStyle(fontSize: 16),
                   ),
+                  onPressed: _handleGoogleSignIn,
                 ),
-                label: const Text(
-                  'Sign in with Google',
-                  style: TextStyle(fontSize: 16),
-                ),
-                onPressed: _handleGoogleSignIn,
-              ),
       ),
     );
   }
 }
-

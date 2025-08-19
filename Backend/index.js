@@ -255,7 +255,6 @@ function parseBankMessage(snippet) {
     vendor: null,
     type: null,
     date: null,
-    raw: snippet,
   };
 
   // Amount (handles Rs/INR)
@@ -268,14 +267,24 @@ function parseBankMessage(snippet) {
   else if (/credited/i.test(snippet)) result.type = "credit";
 
   // Vendor (look for "to" or "at")
+  // ✅ Extract vendor name cleanly (ignore VPAs and emails)
   const vendorMatch = snippet.match(/to\s+([A-Za-z0-9@.\s&-]+)/i);
   if (vendorMatch) {
-    result.vendor = vendorMatch[1].trim();
+    let vendorRaw = vendorMatch[1].trim();
+    // Remove email-like or VPA patterns (e.g., xxxx@xxxx)
+    vendorRaw = vendorRaw.replace(/[a-z0-9._%+-]+@[a-z0-9.-]+/gi, '').trim();
+    // Collapse multiple spaces
+    vendorRaw = vendorRaw.replace(/\s{2,}/g, ' ');
+    result.vendor = vendorRaw;
   } else {
     const atMatch = snippet.match(/at\s+([A-Za-z0-9\s&.-]+)/i);
-    if (atMatch) result.vendor = atMatch[1].trim();
+    if (atMatch) {
+      let vendorRaw = atMatch[1].trim();
+      vendorRaw = vendorRaw.replace(/[a-z0-9._%+-]+@[a-z0-9.-]+/gi, '').trim();
+      vendorRaw = vendorRaw.replace(/\s{2,}/g, ' ');
+      result.vendor = vendorRaw;
+    }
   }
-
   // Date (dd-mm-yy or dd/mm/yyyy)
   const dateMatch = snippet.match(/on\s+(\d{2}[-/]\d{2}[-/]\d{2,4})/);
   if (dateMatch) result.date = dateMatch[1];
@@ -321,27 +330,105 @@ async function fetchBankEmails(accessToken, bankEmails) {
 // ---------- ROUTE ----------
 app.post('/api/sync-gmail', async (req, res) => {
   try {
-    const { accessToken } = req.body;
+    const { accessToken, userId } = req.body;
 
     if (!accessToken) {
+      console.error('❌ Missing access token in request body');
       return res.status(400).json({ error: "Missing access token" });
+    }
+    if (!userId) {
+      console.error('❌ Missing userId in request body');
+      return res.status(400).json({ error: "Missing userId" });
     }
 
     const bankEmails = bankRules.map(b => b.email);
-    const emails = await fetchBankEmails(accessToken, bankEmails);
 
-    // 🔥 parse emails into structured transactions
-    const parsedEmails = emails.map(email => ({
-      from: email.from,
-      ...parseBankMessage(email.snippet),
-    }));
+    let emails;
+    try {
+      emails = await fetchBankEmails(accessToken, bankEmails);
+    } catch (fetchError) {
+      console.error('❌ Error fetching bank emails:', fetchError);
+      return res.status(500).json({ error: 'Failed to fetch bank emails' });
+    }
 
-    res.json({ success: true, emails: parsedEmails });
+    if (!emails || emails.length === 0) {
+      console.warn('⚠️ No bank emails found for provided email accounts');
+      return res.json({ success: true, count: 0, transactions: [] });
+    }
+
+    const savedTxns = [];
+
+    for (const email of emails) {
+      let parsed;
+      try {
+        parsed = parseBankMessage(email.snippet);
+      } catch (parseError) {
+        console.error('❌ Error parsing email snippet:', parseError, 'Snippet:', email.snippet);
+        continue; // Skip this email and move on
+      }
+
+      if (!parsed.amount) {
+        console.warn('⚠️ Parsed email missing amount, skipping:', parsed);
+        continue;
+      }
+
+      let category = 'Other';
+      try {
+        const predictRes = await axios.post('http://192.168.1.10:5000/api/predict', {
+          description: parsed.vendor || "Unknown"
+        }, { timeout: 5000 }); // Optional timeout
+
+        if (predictRes.data && typeof predictRes.data.category === 'string' && predictRes.data.category.trim() !== '') {
+          category = predictRes.data.category;
+        } else {
+          console.warn('⚠️ Prediction API returned invalid category for vendor:', parsed.vendor);
+        }
+      } catch (predictError) {
+        console.error('❌ Prediction API error:', predictError.message);
+      }
+
+      const parseDateString = (dateStr) => {
+  if (!dateStr) return null;
+  const [day, month, yearSuffix] = dateStr.split('-');
+  const year = 2000 + parseInt(yearSuffix, 10);
+  return new Date(year, parseInt(month, 10) - 1, parseInt(day, 10));
+};
+
+const dateValue = parseDateString(parsed.date) || new Date();
+
+const newTxn = new Transaction({
+  userId,
+  description: parsed.vendor || "Unknown Vendor",
+  amount: parsed.amount,
+  type: parsed.type || "unknown",
+  date: dateValue,
+  vendor: parsed.vendor,
+  category,
+  source: "email",
+  bank: email.from,
+});
+
+
+      try {
+        await newTxn.save();
+        savedTxns.push(newTxn);
+      } catch (saveError) {
+        console.error('❌ Error saving transaction to database:', saveError, 'Transaction:', newTxn);
+      }
+    }
+
+    return res.json({
+      success: true,
+      count: savedTxns.length,
+      transactions: savedTxns,
+    });
+
   } catch (error) {
-    console.error('❌ Gmail fetch error:', error);
-    res.status(500).json({ error: 'Failed to fetch Gmail messages' });
+    console.error('❌ Unexpected error in /api/sync-gmail:', error);
+    return res.status(500).json({ error: 'Failed to fetch and save Gmail messages' });
   }
 });
+
 
 /* ---------- SERVER ---------- */
 mongoose.connect(process.env.MONGO_URI, {
