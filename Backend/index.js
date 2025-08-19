@@ -242,12 +242,49 @@ app.post('/api/transactions/voice', async (req, res) => {
   }
 });
 // Bank rules (can expand later)
+// ---------- BANK RULES ----------
 const bankRules = [
   { name: 'HDFC Bank', email: 'alerts@hdfcbank.net' },
-  { name: 'ICICI Bank', email: 'alerts@icicibank.com' }, 
+  { name: 'ICICI Bank', email: 'alerts@icicibank.com' },
 ];
 
-// ✅ Gmail fetch function
+// ---------- PARSER ----------
+function parseBankMessage(snippet) {
+  const result = {
+    amount: null,
+    vendor: null,
+    type: null,
+    date: null,
+    raw: snippet,
+  };
+
+  // Amount (handles Rs/INR)
+  const amtMatch = snippet.match(/(?:Rs\.?|INR)\s*([\d,]+\.?\d*)/i);
+  if (amtMatch) result.amount = parseFloat(amtMatch[1].replace(/,/g, ""));
+
+
+  // Debit / Credit
+  if (/debited/i.test(snippet)) result.type = "debit";
+  else if (/credited/i.test(snippet)) result.type = "credit";
+
+  // Vendor (look for "to" or "at")
+  const vendorMatch = snippet.match(/to\s+([A-Za-z0-9@.\s&-]+)/i);
+  if (vendorMatch) {
+    result.vendor = vendorMatch[1].trim();
+  } else {
+    const atMatch = snippet.match(/at\s+([A-Za-z0-9\s&.-]+)/i);
+    if (atMatch) result.vendor = atMatch[1].trim();
+  }
+
+  // Date (dd-mm-yy or dd/mm/yyyy)
+  const dateMatch = snippet.match(/on\s+(\d{2}[-/]\d{2}[-/]\d{2,4})/);
+  if (dateMatch) result.date = dateMatch[1];
+
+
+  return result;
+}
+
+// ---------- FETCH EMAILS ----------
 async function fetchBankEmails(accessToken, bankEmails) {
   const oauth2Client = new google.auth.OAuth2();
   oauth2Client.setCredentials({ access_token: accessToken });
@@ -281,7 +318,7 @@ async function fetchBankEmails(accessToken, bankEmails) {
   return allEmails;
 }
 
-// ✅ Gmail sync route
+// ---------- ROUTE ----------
 app.post('/api/sync-gmail', async (req, res) => {
   try {
     const { accessToken } = req.body;
@@ -293,7 +330,13 @@ app.post('/api/sync-gmail', async (req, res) => {
     const bankEmails = bankRules.map(b => b.email);
     const emails = await fetchBankEmails(accessToken, bankEmails);
 
-    res.json({ success: true, emails });
+    // 🔥 parse emails into structured transactions
+    const parsedEmails = emails.map(email => ({
+      from: email.from,
+      ...parseBankMessage(email.snippet),
+    }));
+
+    res.json({ success: true, emails: parsedEmails });
   } catch (error) {
     console.error('❌ Gmail fetch error:', error);
     res.status(500).json({ error: 'Failed to fetch Gmail messages' });

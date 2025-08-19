@@ -56,11 +56,12 @@ class _EmailsScreenState extends State<EmailsScreen> {
       });
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Bank Emails"),
+        title: const Text("Bank Transactions"),
         actions: [
           IconButton(icon: const Icon(Icons.refresh), onPressed: fetchEmails),
         ],
@@ -76,10 +77,49 @@ class _EmailsScreenState extends State<EmailsScreen> {
                 itemCount: _emails.length,
                 itemBuilder: (context, index) {
                   final email = _emails[index];
-                  return ListTile(
-                    title: Text(email['subject'] ?? "No subject"),
-                    subtitle: Text(email['snippet'] ?? ""),
-                    leading: const Icon(Icons.email),
+                  return Card(
+                    margin: const EdgeInsets.symmetric(
+                      vertical: 6,
+                      horizontal: 12,
+                    ),
+                    child: ListTile(
+                      leading: Icon(
+                        email['type'] == 'debit'
+                            ? Icons.arrow_upward
+                            : Icons.arrow_downward,
+                        color:
+                            email['type'] == 'debit'
+                                ? Colors.red
+                                : Colors.green,
+                      ),
+                      title: Text(
+                        "₹${email['amount']?.toStringAsFixed(2) ?? '---'}",
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(email['vendor'] ?? "Unknown Vendor"),
+                          Text(
+                            "Date: ${email['date'] ?? 'N/A'}",
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ],
+                      ),
+                      trailing: Text(
+                        email['type']?.toUpperCase() ?? "",
+                        style: TextStyle(
+                          color:
+                              email['type'] == 'debit'
+                                  ? Colors.red
+                                  : Colors.green,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                   );
                 },
               ),
