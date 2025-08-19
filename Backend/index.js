@@ -204,13 +204,87 @@ app.get('/api/transactions/recent', async (req, res) => {
   }
 });
 
+app.post('/api/transactions/voice', async (req, res) => {
+  try {
+    const { voiceInput } = req.body;
+    if (!voiceInput) {
+      return res.status(400).json({ error: 'No voice input provided' });
+    }
+    // Step 1: Use regex to extract amount
+    const amountMatch = voiceInput.match(/(?:\₹|\$)?(\d+(?:\.\d{1,2})?)/);
+    const amount = amountMatch ? parseFloat(amountMatch[1]) : null;
+    // Step 2: Extract description (rough logic: remove common verbs + amount)
+    const cleaned = voiceInput
+      .toLowerCase()
+      .replace(/(bought|added|paid|spent|for|on)/g, '')
+      .replace(/₹?\d+/, '')
+      .trim();
+    const description = cleaned || 'misc';
+    // Step 3: Predict category using your Flask API
+    const predictRes = await axios.post('http://192.168.1.10:5000/api/predict', {
+      description,
+    });
+    const category = predictRes.data?.category || 'Other';
+    // Step 4: Save to DB
+    const newTransaction = new Transaction({
+      description,
+      amount,
+      category,
+    });
+    await newTransaction.save();
+    res.status(200).json({
+      message: '✅ Voice transaction saved',
+      data: newTransaction,
+    });
+  } catch (err) {
+    console.error('❌ Voice transaction error:', err.message);
+    res.status(500).json({ error: 'Server error during voice transaction' });
+  }
+});
 // Bank rules (can expand later)
+// ---------- BANK RULES ----------
 const bankRules = [
   { name: 'HDFC Bank', email: 'alerts@hdfcbank.net' },
-  // { name: 'ICICI Bank', email: 'alerts@icicibank.com' }, // example expansion
+  { name: 'ICICI Bank', email: 'alerts@icicibank.com' },
 ];
 
-// ✅ Gmail fetch function
+// ---------- PARSER ----------
+function parseBankMessage(snippet) {
+  const result = {
+    amount: null,
+    vendor: null,
+    type: null,
+    date: null,
+    raw: snippet,
+  };
+
+  // Amount (handles Rs/INR)
+  const amtMatch = snippet.match(/(?:Rs\.?|INR)\s*([\d,]+\.?\d*)/i);
+  if (amtMatch) result.amount = parseFloat(amtMatch[1].replace(/,/g, ""));
+
+
+  // Debit / Credit
+  if (/debited/i.test(snippet)) result.type = "debit";
+  else if (/credited/i.test(snippet)) result.type = "credit";
+
+  // Vendor (look for "to" or "at")
+  const vendorMatch = snippet.match(/to\s+([A-Za-z0-9@.\s&-]+)/i);
+  if (vendorMatch) {
+    result.vendor = vendorMatch[1].trim();
+  } else {
+    const atMatch = snippet.match(/at\s+([A-Za-z0-9\s&.-]+)/i);
+    if (atMatch) result.vendor = atMatch[1].trim();
+  }
+
+  // Date (dd-mm-yy or dd/mm/yyyy)
+  const dateMatch = snippet.match(/on\s+(\d{2}[-/]\d{2}[-/]\d{2,4})/);
+  if (dateMatch) result.date = dateMatch[1];
+
+
+  return result;
+}
+
+// ---------- FETCH EMAILS ----------
 async function fetchBankEmails(accessToken, bankEmails) {
   const oauth2Client = new google.auth.OAuth2();
   oauth2Client.setCredentials({ access_token: accessToken });
@@ -244,7 +318,7 @@ async function fetchBankEmails(accessToken, bankEmails) {
   return allEmails;
 }
 
-// ✅ Gmail sync route
+// ---------- ROUTE ----------
 app.post('/api/sync-gmail', async (req, res) => {
   try {
     const { accessToken } = req.body;
@@ -256,13 +330,18 @@ app.post('/api/sync-gmail', async (req, res) => {
     const bankEmails = bankRules.map(b => b.email);
     const emails = await fetchBankEmails(accessToken, bankEmails);
 
-    res.json({ success: true, emails });
+    // 🔥 parse emails into structured transactions
+    const parsedEmails = emails.map(email => ({
+      from: email.from,
+      ...parseBankMessage(email.snippet),
+    }));
+
+    res.json({ success: true, emails: parsedEmails });
   } catch (error) {
     console.error('❌ Gmail fetch error:', error);
     res.status(500).json({ error: 'Failed to fetch Gmail messages' });
   }
 });
-
 
 /* ---------- SERVER ---------- */
 mongoose.connect(process.env.MONGO_URI, {
