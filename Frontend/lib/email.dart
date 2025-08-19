@@ -93,7 +93,7 @@ class _EmailsScreenState extends State<EmailsScreen> {
                                 : Colors.green,
                       ),
                       title: Text(
-                        "₹${email['amount']?.toStringAsFixed(2) ?? '---'}",
+                        "₹${(email['amount'] is num) ? (email['amount'] as num).toStringAsFixed(2) : email['amount'] ?? '---'}",
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -102,7 +102,17 @@ class _EmailsScreenState extends State<EmailsScreen> {
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(email['vendor'] ?? "Unknown Vendor"),
+                          Text(
+                            (email['vendor'] ?? "Unknown Vendor")
+                                .replaceAll(
+                                  RegExp(
+                                    r'[a-z0-9._%+-]+@[a-z0-9.-]+',
+                                    caseSensitive: false,
+                                  ),
+                                  '',
+                                )
+                                .trim(),
+                          ),
                           Text(
                             "Date: ${email['date'] ?? 'N/A'}",
                             style: const TextStyle(fontSize: 12),
