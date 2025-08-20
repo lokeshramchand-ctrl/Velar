@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:monarch/other_pages/enviroment.dart';
+
 class AutoSyncEmailsScreen extends StatefulWidget {
   final String accessToken;
   final String userId; // userId now required by backend
@@ -38,7 +40,7 @@ class _AutoSyncEmailsScreenState extends State<AutoSyncEmailsScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse("http://192.168.1.10:3000/api/sync-gmail"),
+        Uri.parse("${Environment.baseUrl}/api/sync-gmail"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "accessToken": widget.accessToken,

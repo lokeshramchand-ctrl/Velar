@@ -48,7 +48,7 @@
 //       }
 
 //       // Step 3: Send token to backend
-//       final uri = Uri.parse("http://192.168.1.10:3000/auth/google/token");
+//       final uri = Uri.parse("${Environment.baseUrl}/auth/google/token");
 //       final res = await http.post(
 //         uri,
 //         headers: {"Content-Type": "application/json"},
@@ -163,7 +163,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
 
       // Send idToken to backend for login
-      final uri = Uri.parse("http://192.168.1.10:3000/auth/google/token");
+      final uri = Uri.parse("${Environment.baseUrl}/auth/google/token");
       final res = await http.post(
         uri,
         headers: {"Content-Type": "application/json"},

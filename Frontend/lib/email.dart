@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:monarch/other_pages/enviroment.dart';
+
 class EmailsScreen extends StatefulWidget {
   final String accessToken;
   final String userId;
@@ -29,7 +31,7 @@ class _EmailsScreenState extends State<EmailsScreen> {
 
   Future<void> fetchEmails() async {
     try {
-      final uri = Uri.parse("http://192.168.1.10:3000/api/sync-gmail");
+      final uri = Uri.parse("${Environment.baseUrl}/api/sync-gmail");
 
       final res = await http.post(
         uri,

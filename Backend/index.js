@@ -155,7 +155,7 @@ app.post('/api/transaction/add', async (req, res) => {
     const { description, amount, userId } = req.body;
     if (!userId) return res.status(400).json({ error: 'Missing userId' });
 
-    const predictRes = await axios.post('http://192.168.1.10:5000/api/predict', {
+    const predictRes = await axios.post('http://10.231.8.114:5000/api/predict', {
       description,
     });
     const category = predictRes.data.category || 'Other';
@@ -221,7 +221,7 @@ app.post('/api/transactions/voice', async (req, res) => {
       .trim();
     const description = cleaned || 'misc';
     // Step 3: Predict category using your Flask API
-    const predictRes = await axios.post('http://192.168.1.10:5000/api/predict', {
+    const predictRes = await axios.post('http://10.231.8.114:5000/api/predict', {
       description,
     });
     const category = predictRes.data?.category || 'Other';
@@ -373,7 +373,7 @@ app.post('/api/sync-gmail', async (req, res) => {
       }
       let category = 'Other';
       try {
-        const predictRes = await axios.post('http://192.168.1.10:5000/api/predict', {
+        const predictRes = await axios.post('http://10.231.8.114:5000/api/predict', {
           description: parsed.vendor || "Unknown"
         }, { timeout: 5000 }); // Optional timeout
 
