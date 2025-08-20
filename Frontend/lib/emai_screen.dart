@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:monarch/main_pages/HomePage/homepage.dart';
 import 'dart:convert';
 
 import 'package:monarch/other_pages/enviroment.dart';
@@ -60,7 +61,10 @@ class _AutoSyncEmailsScreenState extends State<AutoSyncEmailsScreen> {
 
           // Optional: navigate back or to another screen after a delay
           Future.delayed(const Duration(seconds: 2), () {
-            Navigator.pop(context, true);
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const FinTrackHomePage()),
+            );
           });
         } else {
           setState(() {

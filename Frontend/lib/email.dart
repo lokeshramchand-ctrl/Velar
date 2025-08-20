@@ -36,7 +36,10 @@ class _EmailsScreenState extends State<EmailsScreen> {
       final res = await http.post(
         uri,
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"accessToken": widget.accessToken}),
+        body: jsonEncode({
+          "accessToken": widget.accessToken,
+          "userId": widget.userId, // Added userId here
+        }),
       );
 
       if (res.statusCode == 200) {

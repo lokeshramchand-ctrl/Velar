@@ -30,11 +30,20 @@ const User = mongoose.model('User', userSchema);
 
 const transactionSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  description: String,
-  amount: Number,
-  category: String,
+
+  description: { type: String, required: true },
+  amount: { type: Number, required: true },
+  category: { type: String, default: "Other" },
   date: { type: Date, default: Date.now },
+
+  type: { type: String, default: "unknown" },
+  vendor: String,                              // Optional vendor/store name
+
+  source: { type: String, enum: ['manual', 'voice', 'email'], required: true },
+
+  referenceNumber: { type: String, unique: true, sparse: true }, // Unique transaction id for deduplication
 });
+
 const Transaction = mongoose.model('Transaction', transactionSchema);
 
 /* ---------- SESSION ---------- */
@@ -164,7 +173,8 @@ app.post('/api/transaction/add', async (req, res) => {
       userId,
       description,
       amount,
-      category
+      category,
+      source: 'manual',
     });
     await newTransaction.save();
 
@@ -230,6 +240,7 @@ app.post('/api/transactions/voice', async (req, res) => {
       description,
       amount,
       category,
+      source: 'voice'
     });
     await newTransaction.save();
     res.status(200).json({
@@ -371,6 +382,14 @@ app.post('/api/sync-gmail', async (req, res) => {
         console.warn('⚠️ Parsed email missing amount, skipping:', parsed);
         continue;
       }
+
+      // Extract unique transaction reference number from snippet
+      let referenceNumber = null;
+      const refMatch = email.snippet.match(/(?:reference number is|Ref\s*[:No]*\s*)([A-Za-z0-9]+)/i);
+      if (refMatch) {
+        referenceNumber = refMatch[1];
+      }
+
       let category = 'Other';
       try {
         const predictRes = await axios.post('http://10.231.8.114:5000/api/predict', {
@@ -387,33 +406,54 @@ app.post('/api/sync-gmail', async (req, res) => {
       }
 
       const parseDateString = (dateStr) => {
-  if (!dateStr) return null;
-  const [day, month, yearSuffix] = dateStr.split('-');
-  const year = 2000 + parseInt(yearSuffix, 10);
-  return new Date(year, parseInt(month, 10) - 1, parseInt(day, 10));
-};
+        if (!dateStr) return null;
+        const [day, month, yearSuffix] = dateStr.split('-');
+        const year = 2000 + parseInt(yearSuffix, 10);
+        return new Date(year, parseInt(month, 10) - 1, parseInt(day, 10));
+      };
 
-const dateValue = parseDateString(parsed.date) || new Date();
-
-const newTxn = new Transaction({
-  userId,
-  description: parsed.vendor || "Unknown Vendor",
-  amount: parsed.amount,
-  type: parsed.type || "unknown",
-  date: dateValue,
-  vendor: parsed.vendor,
-  category,
-  source: "email",
-  bank: email.from,
-});
-
+      const dateValue = parseDateString(parsed.date) || new Date();
 
       try {
-        await newTxn.save();
-        savedTxns.push(newTxn);
+        if (referenceNumber) {
+          // Upsert transaction based on unique referenceNumber for emails, mark source as 'email'
+          const updatedTxn = await Transaction.findOneAndUpdate(
+            { referenceNumber },  // search criteria for deduplication
+            {
+              userId,
+              description: parsed.vendor || "Unknown Vendor",
+              amount: parsed.amount,
+              type: parsed.type || "unknown",
+              date: dateValue,
+              vendor: parsed.vendor,
+              category,
+              source: "email",  // mark source explicitly
+              bank: email.from,
+              referenceNumber,
+            },
+            { upsert: true, new: true, setDefaultsOnInsert: true }
+          );
+          savedTxns.push(updatedTxn);
+        } else {
+          // No reference number available, just save normally; source still 'email'
+          const newTxn = new Transaction({
+            userId,
+            description: parsed.vendor || "Unknown Vendor",
+            amount: parsed.amount,
+            type: parsed.type || "unknown",
+            date: dateValue,
+            vendor: parsed.vendor,
+            category,
+            source: "email",  // mark source explicitly
+            bank: email.from,
+          });
+          await newTxn.save();
+          savedTxns.push(newTxn);
+        }
       } catch (saveError) {
-        console.error('❌ Error saving transaction to database:', saveError, 'Transaction:', newTxn);
+        console.error('❌ Error saving transaction to database:', saveError);
       }
+
     }
 
     return res.json({
@@ -421,13 +461,11 @@ const newTxn = new Transaction({
       count: savedTxns.length,
       transactions: savedTxns,
     });
-
   } catch (error) {
     console.error('❌ Unexpected error in /api/sync-gmail:', error);
     return res.status(500).json({ error: 'Failed to fetch and save Gmail messages' });
   }
 });
-
 
 /* ---------- SERVER ---------- */
 mongoose.connect(process.env.MONGO_URI, {
