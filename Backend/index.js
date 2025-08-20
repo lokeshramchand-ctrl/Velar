@@ -371,7 +371,6 @@ app.post('/api/sync-gmail', async (req, res) => {
         console.warn('⚠️ Parsed email missing amount, skipping:', parsed);
         continue;
       }
-
       let category = 'Other';
       try {
         const predictRes = await axios.post('http://192.168.1.10:5000/api/predict', {
