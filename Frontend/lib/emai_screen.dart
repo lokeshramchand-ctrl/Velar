@@ -2,7 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:monarch/main_pages/HomePage/homepage.dart';
 import 'dart:convert';
+
+import 'package:monarch/other_pages/enviroment.dart';
 
 class AutoSyncEmailsScreen extends StatefulWidget {
   final String accessToken;
@@ -38,7 +41,7 @@ class _AutoSyncEmailsScreenState extends State<AutoSyncEmailsScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse("http://192.168.1.10:3000/api/sync-gmail"),
+        Uri.parse("${Environment.baseUrl}/api/sync-gmail"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "accessToken": widget.accessToken,
@@ -58,7 +61,10 @@ class _AutoSyncEmailsScreenState extends State<AutoSyncEmailsScreen> {
 
           // Optional: navigate back or to another screen after a delay
           Future.delayed(const Duration(seconds: 2), () {
-            Navigator.pop(context, true);
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const FinTrackHomePage()),
+            );
           });
         } else {
           setState(() {

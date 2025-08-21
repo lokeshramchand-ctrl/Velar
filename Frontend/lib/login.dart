@@ -48,7 +48,7 @@
 //       }
 
 //       // Step 3: Send token to backend
-//       final uri = Uri.parse("http://192.168.1.10:3000/auth/google/token");
+//       final uri = Uri.parse("${Environment.baseUrl}/auth/google/token");
 //       final res = await http.post(
 //         uri,
 //         headers: {"Content-Type": "application/json"},
@@ -61,10 +61,10 @@
 //           debugPrint("✅ User logged in: ${data['user']}");
 //           final prefs = await SharedPreferences.getInstance();
 //           prefs.setString('userId', data['user']['_id']);
-//           Navigator.pushReplacement(
-//             context,
-//             MaterialPageRoute(builder: (_) => const EmailsScreen(accessToken: '', userId: 'userId',)),
-//           );
+// Navigator.pushReplacement(
+//   context,
+//   MaterialPageRoute(builder: (_) => const EmailsScreen(accessToken: '', userId: 'userId',)),
+// );
 //         } else {
 //           debugPrint("❌ Login failed: ${data['error']}");
 //         }
@@ -116,6 +116,7 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:monarch/emai_screen.dart';
+import 'package:monarch/email.dart';
 //import 'package:monarch/email.dart';
 import 'package:monarch/other_pages/enviroment.dart';
 import 'dart:convert';
@@ -163,7 +164,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
 
       // Send idToken to backend for login
-      final uri = Uri.parse("http://192.168.1.10:3000/auth/google/token");
+      final uri = Uri.parse("${Environment.baseUrl}/auth/google/token");
       final res = await http.post(
         uri,
         headers: {"Content-Type": "application/json"},
@@ -181,10 +182,11 @@ class _LoginScreenState extends State<LoginScreen> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              // builder: (_) => EmailsScreen(
-              //   accessToken: accessToken,
-              //   userId: data['user']['_id'],
-              // ),
+              // builder:
+              //     (_) => EmailsScreen(
+              //       accessToken: accessToken,
+              //       userId: data['user']['_id'],
+              //     ),
               builder: (_) => AutoSyncEmailsScreen(accessToken: accessToken,userId: data['user']['_id'],),
             ),
           );
