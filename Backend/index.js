@@ -30,17 +30,13 @@ const User = mongoose.model('User', userSchema);
 
 const transactionSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-
   description: { type: String, required: true },
   amount: { type: Number, required: true },
   category: { type: String, default: "Other" },
   date: { type: Date, default: Date.now },
-
   type: { type: String, default: "unknown" },
   vendor: String,                              // Optional vendor/store name
-
   source: { type: String, enum: ['manual', 'voice', 'email'], required: true },
-
   referenceNumber: { type: String, unique: true, sparse: true }, // Unique transaction id for deduplication
 });
 
@@ -164,7 +160,7 @@ app.post('/api/transaction/add', async (req, res) => {
     const { description, amount, userId } = req.body;
     if (!userId) return res.status(400).json({ error: 'Missing userId' });
 
-    const predictRes = await axios.post('http://10.231.8.114:5000/api/predict', {
+    const predictRes = await axios.post('http://192.168.1.101:5000/api/predict', {
       description,
     });
     const category = predictRes.data.category || 'Other';
@@ -213,7 +209,7 @@ app.get('/api/transactions/recent', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
+//VOICE
 app.post('/api/transactions/voice', async (req, res) => {
   try {
     const { voiceInput } = req.body;
@@ -231,7 +227,7 @@ app.post('/api/transactions/voice', async (req, res) => {
       .trim();
     const description = cleaned || 'misc';
     // Step 3: Predict category using your Flask API
-    const predictRes = await axios.post('http://10.231.8.114:5000/api/predict', {
+    const predictRes = await axios.post('http://192.168.1.101:5000/api/predict', {
       description,
     });
     const category = predictRes.data?.category || 'Other';
@@ -266,40 +262,41 @@ function parseBankMessage(snippet) {
     vendor: null,
     type: null,
     date: null,
+    referenceNumber: null,
   };
 
-  // Amount (handles Rs/INR)
+  // Amount
   const amtMatch = snippet.match(/(?:Rs\.?|INR)\s*([\d,]+\.?\d*)/i);
   if (amtMatch) result.amount = parseFloat(amtMatch[1].replace(/,/g, ""));
-
 
   // Debit / Credit
   if (/debited/i.test(snippet)) result.type = "debit";
   else if (/credited/i.test(snippet)) result.type = "credit";
 
-  // Vendor (look for "to" or "at")
-  // ✅ Extract vendor name cleanly (ignore VPAs and emails)
-  const vendorMatch = snippet.match(/to\s+([A-Za-z0-9@.\s&-]+)/i);
-  if (vendorMatch) {
-    let vendorRaw = vendorMatch[1].trim();
-    // Remove email-like or VPA patterns (e.g., xxxx@xxxx)
-    vendorRaw = vendorRaw.replace(/[a-z0-9._%+-]+@[a-z0-9.-]+/gi, '').trim();
-    // Collapse multiple spaces
-    vendorRaw = vendorRaw.replace(/\s{2,}/g, ' ');
-    result.vendor = vendorRaw;
-  } else {
-    const atMatch = snippet.match(/at\s+([A-Za-z0-9\s&.-]+)/i);
-    if (atMatch) {
-      let vendorRaw = atMatch[1].trim();
-      vendorRaw = vendorRaw.replace(/[a-z0-9._%+-]+@[a-z0-9.-]+/gi, '').trim();
-      vendorRaw = vendorRaw.replace(/\s{2,}/g, ' ');
-      result.vendor = vendorRaw;
-    }
-  }
-  // Date (dd-mm-yy or dd/mm/yyyy)
-  const dateMatch = snippet.match(/on\s+(\d{2}[-/]\d{2}[-/]\d{2,4})/);
+  // Date
+  const dateMatch = snippet.match(/on\s+(\d{2}[-/]\d{2}[-/]\d{2,4})/i);
   if (dateMatch) result.date = dateMatch[1];
 
+  // Reference Number (flexible regex)
+  const refMatch = snippet.match(/(?:reference number is|UPI reference number is|Ref No:?)\s*([A-Za-z0-9]+)/i);
+  if (refMatch) result.referenceNumber = refMatch[1].trim();
+
+  // Vendor extraction - remove emails, pick last uppercase phrase
+  let vendorCandidate = snippet.replace(/[a-z0-9._%+-]+@[a-z0-9.-]+/gi, '').trim();
+
+  const vendorWords = vendorCandidate.match(/(?:\b[A-Z]{2,}\b(?:\s)?)+/g);
+  if (vendorWords && vendorWords.length > 0) {
+    result.vendor = vendorWords[vendorWords.length - 1].trim();
+  } else {
+    // Fallback: extract after "to " or "at "
+    const toMatch = snippet.match(/to\s+([A-Za-z0-9\s&.-]+)/i);
+    if (toMatch) {
+      let v = toMatch[1].trim();
+      v = v.replace(/[a-z0-9._%+-]+@[a-z0-9.-]+/gi, '').trim();
+      v = v.replace(/\s{2,}/g, ' ');
+      result.vendor = v;
+    }
+  }
 
   return result;
 }
@@ -327,7 +324,18 @@ async function fetchBankEmails(accessToken, bankEmails) {
         id: msg.id,
       });
 
-      const snippet = fullMessage.data.snippet || "";
+      let body = "";
+      if (fullMessage.data.payload?.parts) {
+        for (const part of fullMessage.data.payload.parts) {
+          if (part.mimeType === "text/plain" && part.body?.data) {
+            body += Buffer.from(part.body.data, "base64").toString("utf-8");
+          }
+          if (part.mimeType === "text/html" && part.body?.data) {
+            body += Buffer.from(part.body.data, "base64").toString("utf-8");
+          }
+        }
+      }
+      const snippet = body || fullMessage.data.snippet || "";
       allEmails.push({
         from: bankEmail,
         snippet,
@@ -372,6 +380,7 @@ app.post('/api/sync-gmail', async (req, res) => {
     for (const email of emails) {
       let parsed;
       try {
+       // console.log('📧 Processing email snippet:', email.snippet);
         parsed = parseBankMessage(email.snippet);
       } catch (parseError) {
         console.error('❌ Error parsing email snippet:', parseError, 'Snippet:', email.snippet);
@@ -383,16 +392,9 @@ app.post('/api/sync-gmail', async (req, res) => {
         continue;
       }
 
-      // Extract unique transaction reference number from snippet
-      let referenceNumber = null;
-      const refMatch = email.snippet.match(/(?:reference number is|Ref\s*[:No]*\s*)([A-Za-z0-9]+)/i);
-      if (refMatch) {
-        referenceNumber = refMatch[1];
-      }
-
       let category = 'Other';
       try {
-        const predictRes = await axios.post('http://10.231.8.114:5000/api/predict', {
+        const predictRes = await axios.post('http://192.168.1.101:5000/api/predict', {
           description: parsed.vendor || "Unknown"
         }, { timeout: 5000 }); // Optional timeout
 
@@ -415,10 +417,9 @@ app.post('/api/sync-gmail', async (req, res) => {
       const dateValue = parseDateString(parsed.date) || new Date();
 
       try {
-        if (referenceNumber) {
-          // Upsert transaction based on unique referenceNumber for emails, mark source as 'email'
+        if (parsed.referenceNumber) {
           const updatedTxn = await Transaction.findOneAndUpdate(
-            { referenceNumber },  // search criteria for deduplication
+            { referenceNumber: parsed.referenceNumber },
             {
               userId,
               description: parsed.vendor || "Unknown Vendor",
@@ -427,44 +428,42 @@ app.post('/api/sync-gmail', async (req, res) => {
               date: dateValue,
               vendor: parsed.vendor,
               category,
-              source: "email",  // mark source explicitly
+              source: "email",
               bank: email.from,
-              referenceNumber,
+              referenceNumber: parsed.referenceNumber,
             },
             { upsert: true, new: true, setDefaultsOnInsert: true }
           );
           savedTxns.push(updatedTxn);
-        } else {
-          // No reference number available, just save normally; source still 'email'
-          const newTxn = new Transaction({
-            userId,
-            description: parsed.vendor || "Unknown Vendor",
-            amount: parsed.amount,
-            type: parsed.type || "unknown",
-            date: dateValue,
-            vendor: parsed.vendor,
-            category,
-            source: "email",  // mark source explicitly
-            bank: email.from,
-          });
-          await newTxn.save();
-          savedTxns.push(newTxn);
-        }
-      } catch (saveError) {
-        console.error('❌ Error saving transaction to database:', saveError);
+      } else {
+        const newTxn = new Transaction({
+          userId,
+          description: parsed.vendor || "Unknown Vendor",
+          amount: parsed.amount,
+          type: parsed.type || "unknown",
+          date: dateValue,
+          vendor: parsed.vendor,
+          category,
+          source: "email",  // mark source explicitly
+          bank: email.from,
+        });
+        await newTxn.save();
+        savedTxns.push(newTxn);
       }
-
+    } catch (saveError) {
+      console.error('❌ Error saving transaction to database:', saveError);
     }
 
-    return res.json({
-      success: true,
-      count: savedTxns.length,
-      transactions: savedTxns,
-    });
-  } catch (error) {
-    console.error('❌ Unexpected error in /api/sync-gmail:', error);
-    return res.status(500).json({ error: 'Failed to fetch and save Gmail messages' });
   }
+    return res.json({
+    success: true,
+    count: savedTxns.length,
+    transactions: savedTxns,
+  });
+} catch (error) {
+  console.error('❌ Unexpected error in /api/sync-gmail:', error);
+  return res.status(500).json({ error: 'Failed to fetch and save Gmail messages' });
+}
 });
 
 /* ---------- SERVER ---------- */

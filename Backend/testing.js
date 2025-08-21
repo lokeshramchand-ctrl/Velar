@@ -1,19 +1,5 @@
 const testEmails = [
-  `Dear Customer,
-Rs.60.00 has been debited from account 5488 to VPA pavithramart.63434836@hdfcbank PAVITHRA MART on 24-07-25.
-Your UPI transaction reference number is 108642900372.
-If you did not authorize this transaction, please report it immediately by calling 18002586161 Or SMS BLOCK UPI to 7308080808.
-Warm Regards,
-HDFC Bank`,
-
-  `Rs.75.00 has been debited to VPA pavithramart.63434836@hdfcbank PAVITHRA MART on 01-08-25.
-Your UPI transaction reference number is 109128631655.`,
-
-  `Rs.299.00 credited to account 1234 from AmazonMarketplace on 19-08-25.
-UPI reference number is 123456789012.`,
-
-  `INR 150.00 debited at STARBUCKS on 20-08-25.
-Ref No: 9876543210`,
+  `Dear Customer, Rs.20.00 has been debited from account 5488 to VPA paytm.s1eeznf@pty SHS CANTEEN 1 on 18-08-25. Your UPI transaction reference number is 109983023268. If you did not authorize this `
 ];
 
 function parseBankMessage(snippet) {
@@ -35,31 +21,36 @@ function parseBankMessage(snippet) {
 
   // Date
   const dateMatch = snippet.match(/on\s+(\d{2}[-/]\d{2}[-/]\d{2,4})/i);
-  if (dateMatch) result.date = dateMatch[1];
+  if (dateMatch) result.date = dateMatch;
 
-  // Reference Number (flexible regex)
-  const refMatch = snippet.match(/(?:reference number is|UPI reference number is|Ref No:?)\s*([A-Za-z0-9]+)/i);
-  if (refMatch) result.referenceNumber = refMatch[1].trim();
+  // Reference number
+  const refMatch = snippet.match(/reference number is\s*([\d]+)/i);
+  if (refMatch) result.referenceNumber = refMatch.trim();
 
-  // Vendor extraction - remove emails, pick last uppercase phrase
-  let vendorCandidate = snippet.replace(/[a-z0-9._%+-]+@[a-z0-9.-]+/gi, '').trim();
+  // Improved vendor extraction:
+  // Try to extract vendor from phrases like "to <vendor>" or "at <vendor>"
 
-  const vendorWords = vendorCandidate.match(/(?:\b[A-Z]{2,}\b(?:\s)?)+/g);
-  if (vendorWords && vendorWords.length > 0) {
-    result.vendor = vendorWords[vendorWords.length - 1].trim();
+  let vendor = null;
+
+  const toMatch = snippet.match(/to\s+([A-Za-z0-9\s.&'-]+)/i);
+  if (toMatch) {
+    vendor = toMatch.replace(/[a-z0-9._%+-]+@[a-z0-9.-]+/gi, '').trim();
   } else {
-    // Fallback: extract after "to " or "at "
-    const toMatch = snippet.match(/to\s+([A-Za-z0-9\s&.-]+)/i);
-    if (toMatch) {
-      let v = toMatch[1].trim();
-      v = v.replace(/[a-z0-9._%+-]+@[a-z0-9.-]+/gi, '').trim();
-      v = v.replace(/\s{2,}/g, ' ');
-      result.vendor = v;
+    const atMatch = snippet.match(/at\s+([A-Za-z0-9\s.&'-]+)/i);
+    if (atMatch) {
+      vendor = atMatch.replace(/[a-z0-9._%+-]+@[a-z0-9.-]+/gi, '').trim();
     }
   }
 
+  // Clean extra spaces or trailing punctuation
+  if (vendor) {
+    vendor = vendor.replace(/\s{2,}/g, ' ').replace(/[.,]$/, '').trim();
+  }
+  result.vendor = vendor || "Unknown";
+
   return result;
 }
+
 
 console.log("=== Bank Email Regex Test ===");
 testEmails.forEach((email, idx) => {
