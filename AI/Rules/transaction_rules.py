@@ -112,7 +112,7 @@ def get_category_from_rules(vendor_name: str):
     "ikea": "Shopping",
 
     # ---------- BILLS ----------
-     "electricity": "Bills",
+    "electricity": "Bills",
     "power": "Bills",
     "water bill": "Bills",
     "internet": "Bills",
