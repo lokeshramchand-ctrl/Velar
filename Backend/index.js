@@ -227,7 +227,7 @@ app.post('/api/transactions/voice', async (req, res) => {
       .trim();
     const description = cleaned || 'misc';
     // Step 3: Predict category using your Flask API
-    const predictRes = await axios.post('http://10.231.41.181:5000/api/predict', {
+    const predictRes = await axios.post('http://192.168.1.101:5000/api/predict', {
       description,
     });
     const category = predictRes.data?.category || 'Other';
@@ -256,50 +256,85 @@ const bankRules = [
 ];
 
 // ---------- PARSER ----------
-function parseBankMessage(snippet) {
+function parseBankMessage(email) {
   const result = {
     amount: null,
     vendor: null,
+    rawVendor: null,
     type: null,
     date: null,
     referenceNumber: null,
   };
 
-  // Amount
-  const amtMatch = snippet.match(/(?:Rs\.?|INR)\s*([\d,]+\.?\d*)/i);
+  // ---------- Amount ----------
+  const amtMatch = email.match(/(?:Rs\.?|INR)\s*([\d,]+\.?\d*)/i);
   if (amtMatch) result.amount = parseFloat(amtMatch[1].replace(/,/g, ""));
 
-  // Debit / Credit
-  if (/debited/i.test(snippet)) result.type = "debit";
-  else if (/credited/i.test(snippet)) result.type = "credit";
+  // ---------- Debit / Credit ----------
+  if (/debited/i.test(email)) result.type = "debit";
+  else if (/credited/i.test(email)) result.type = "credit";
 
-  // Date
-  const dateMatch = snippet.match(/on\s+(\d{2}[-/]\d{2}[-/]\d{2,4})/i);
+  // ---------- Date ----------
+  const dateMatch = email.match(/on\s+(\d{2}[-/]\d{2}[-/]\d{2,4})/i);
   if (dateMatch) result.date = dateMatch[1];
 
-  // Reference Number (flexible regex)
-  const refMatch = snippet.match(/(?:reference number is|UPI reference number is|Ref No:?)\s*([A-Za-z0-9]+)/i);
+  // ---------- Reference Number ----------
+  const refMatch = email.match(/(?:reference number is|UPI transaction reference number is|Ref No:?)\s*([A-Za-z0-9]+)/i);
   if (refMatch) result.referenceNumber = refMatch[1].trim();
 
-  // Vendor extraction - remove emails, pick last uppercase phrase
-  let vendorCandidate = snippet.replace(/[a-z0-9._%+-]+@[a-z0-9.-]+/gi, '').trim();
+  // ---------- Vendor Extraction ----------
+  let vendorCandidate = null;
 
-  const vendorWords = vendorCandidate.match(/(?:\b[A-Z]{2,}\b(?:\s)?)+/g);
-  if (vendorWords && vendorWords.length > 0) {
-    result.vendor = vendorWords[vendorWords.length - 1].trim();
-  } else {
-    // Fallback: extract after "to " or "at "
-    const toMatch = snippet.match(/to\s+([A-Za-z0-9\s&.-]+)/i);
-    if (toMatch) {
-      let v = toMatch[1].trim();
-      v = v.replace(/[a-z0-9._%+-]+@[a-z0-9.-]+/gi, '').trim();
-      v = v.replace(/\s{2,}/g, ' ');
-      result.vendor = v;
+  // 1. Prefer "to VPA ..." pattern, stop at 'on|your|Ref|Txn' etc.
+  const toMatch = email.match(/to\s+(?:VPA\s+)?(?:[^\s@]+\@[^\s]+\s+)?([A-Za-z0-9\s&.-]+)/i);
+  if (toMatch) {
+    vendorCandidate = toMatch[1]
+      .split(/ on | your | ref | txn | transaction | number /i)[0]  // cut off junk
+      .trim();
+  }
+
+  // 2. Fallback: fully uppercase phrases
+  if (!vendorCandidate) {
+    const upperMatch = email.match(/(?:\b[A-Z][A-Z0-9&.-]+\b(?:\s)?)+/g);
+    if (upperMatch) {
+      vendorCandidate = upperMatch[upperMatch.length - 1].trim();
     }
+  }
+
+  // Assign rawVendor
+  if (vendorCandidate) {
+    result.rawVendor = vendorCandidate;
+  }
+
+  // ---------- Cleaning Pipeline ----------
+  if (result.rawVendor) {
+    let v = result.rawVendor;
+
+    // Remove noise keywords
+    v = v.replace(/\b(?:UPI|VPA|REF|Txn|Order|Payment|NEFT|IMPS|Transaction|Number|Your)\b/gi, "");
+
+    // Remove emails
+    v = v.replace(/[a-z0-9._%+-]+@[a-z0-9.-]+/gi, "");
+
+    // Remove dates & numbers that sneak in
+    v = v.replace(/\d{2}[-/]\d{2}[-/]\d{2,4}/g, "");
+    v = v.replace(/\b\d{6,}\b/g, ""); // strip long numbers like reference ids
+
+    // Replace underscores/dashes with space
+    v = v.replace(/[_\-]+/g, " ");
+
+    // Collapse multiple spaces
+    v = v.replace(/\s{2,}/g, " ").trim();
+
+    // Normalize casing
+    v = v.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+
+    result.vendor = v;
   }
 
   return result;
 }
+
 
 // ---------- FETCH EMAILS ----------
 async function fetchBankEmails(accessToken, bankEmails) {
