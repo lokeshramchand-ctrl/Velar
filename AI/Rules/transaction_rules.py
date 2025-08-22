@@ -10,6 +10,7 @@ def get_category_from_rules(vendor_name: str):
    # ---------- FOOD ----------
     "mcdonalds": "Food",
     "kfc": "Food",
+    "bakers":"Food",
     "hotel": "Food",
     "restaurant": "Food",
     "canteen": "Food",
