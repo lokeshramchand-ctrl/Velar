@@ -823,7 +823,6 @@ class _FinTrackHomePageState extends State<FinTrackHomePage>
         accentColor: accentColor,
         primaryColor: primaryColor,
         cardColor: cardColor,
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerTop,
       ),
     );
   }

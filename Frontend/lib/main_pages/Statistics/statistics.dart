@@ -772,7 +772,6 @@ class StatisticsState extends State<Statistics> with TickerProviderStateMixin {
         accentColor: accentColor,
         primaryColor: primaryColor,
         cardColor: cardColor,
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       ),
     );
   }
