@@ -1,238 +1,5 @@
-// // ignore_for_file: deprecated_member_use, unused_local_variable, use_super_parameters, avoid_print
-
-// import 'package:flutter/material.dart';
-// import 'package:google_fonts/google_fonts.dart';
-// import 'package:monarch/other_pages/colors.dart';
-// import 'package:monarch/support/fetch_service.dart';
-// import 'package:monarch/main_pages/HomePage/hero_card.dart';
-// import 'package:monarch/main_pages/HomePage/navbar.dart';
-// import 'package:monarch/main_pages/HomePage/quick_actions.dart';
-// import 'package:monarch/support/transcations_recent.dart';
-
-// class FinTrackHomePage extends StatefulWidget {
-//   const FinTrackHomePage({Key? key}) : super(key: key);
-
-//   @override
-//   State<FinTrackHomePage> createState() => _FinTrackHomePageState();
-// }
-
-// class _FinTrackHomePageState extends State<FinTrackHomePage>
-//     with TickerProviderStateMixin {
-
-//   // Animation Controllers
-//   late AnimationController _fadeController;
-//   late AnimationController _slideController;
-//   late Animation<double> _fadeAnimation;
-//   late Animation<Offset> _slideAnimation;
-
-//   // Navigation State
-//   int _selectedIndex = 0;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     _initializeData();
-//     _setupAnimations();
-//   }
-
-//   @override
-//   void dispose() {
-//     _fadeController.dispose();
-//     _slideController.dispose();
-//     super.dispose();
-//   }
-
-//   // Initialize data fetching
-//   void _initializeData() {
-//     fetchRecentTransactions().then((transactions) {
-//       // Handle transactions data
-//     });
-//   }
-
-//   // Setup animation controllers and animations
-//   void _setupAnimations() {
-//     _fadeController = AnimationController(
-//       duration: const Duration(milliseconds: 1200),
-//       vsync: this,
-//     );
-
-//     _slideController = AnimationController(
-//       duration: const Duration(milliseconds: 800),
-//       vsync: this,
-//     );
-
-//     _fadeAnimation = Tween<double>(
-//       begin: 0.0,
-//       end: 1.0,
-//     ).animate(CurvedAnimation(
-//       parent: _fadeController,
-//       curve: Curves.easeOut,
-//     ));
-
-//     _slideAnimation = Tween<Offset>(
-//       begin: const Offset(0, 0.3),
-//       end: Offset.zero,
-//     ).animate(CurvedAnimation(
-//       parent: _slideController,
-//       curve: Curves.easeOutCubic,
-//     ));
-
-//     // Start animations
-//     _fadeController.forward();
-//     _slideController.forward();
-//   }
-
-//   // Build greeting header with enhanced styling
-//   Widget _buildGreetingHeader() {
-//     return Container(
-//       margin: const EdgeInsets.only(bottom: 24),
-//       child: Row(
-//         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//         crossAxisAlignment: CrossAxisAlignment.center,
-//         children: [
-//           // Greeting Section
-//           Expanded(
-//             child: Column(
-//               crossAxisAlignment: CrossAxisAlignment.start,
-//               children: [
-//                 Text(
-//                   'Good Morning! 👋',
-//                   style: GoogleFonts.inter(
-//                     color: primaryColor,
-//                     fontSize: 28,
-//                     fontWeight: FontWeight.w700,
-//                     height: 1.2,
-//                   ),
-//                 ),
-//                 const SizedBox(height: 4),
-//                 Text(
-//                   'Welcome back to your financial dashboard',
-//                   style: GoogleFonts.inter(
-//                     color: primaryColor.withOpacity(0.7),
-//                     fontSize: 14,
-//                     fontWeight: FontWeight.w400,
-//                   ),
-//                 ),
-//               ],
-//             ),
-//           ),
-
-//           // Notification Button with enhanced design
-//           Container(
-//             width: 52,
-//             height: 52,
-//             decoration: BoxDecoration(
-//               color: cardColor,
-//               borderRadius: BorderRadius.circular(18),
-//               boxShadow: [
-//                 BoxShadow(
-//                   color: accentColor.withOpacity(0.1),
-//                   blurRadius: 12,
-//                   offset: const Offset(0, 4),
-//                 ),
-//               ],
-//               border: Border.all(
-//                 color: accentColor.withOpacity(0.1),
-//                 width: 1,
-//               ),
-//             ),
-//             child: Material(
-//               color: Colors.transparent,
-//               child: InkWell(
-//                 borderRadius: BorderRadius.circular(18),
-//                 onTap: () {
-//                   // Handle notification tap
-//                 },
-//                 child: Icon(
-//                   Icons.notifications_outlined,
-//                   color: accentColor,
-//                   size: 26,
-//                 ),
-//               ),
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-
-//   // Build main content sections
-//   Widget _buildMainContent() {
-//     return Column(
-//       crossAxisAlignment: CrossAxisAlignment.start,
-//       children: [
-//         // Balance Card Section
-//         Container(
-//           margin: const EdgeInsets.only(bottom: 28),
-//           child: const BalanceCardPage(),
-//         ),
-
-//         // Quick Actions Section
-//         Container(
-//           margin: const EdgeInsets.only(bottom: 28),
-//           child: QuickActionsPage(),
-//         ),
-
-//         // Recent Transactions Section
-//         Container(
-//           margin: const EdgeInsets.only(bottom: 32),
-//           child: RecentTransactionsWidget(
-//             recentTransactions: fetchRecentTransactions(),
-//           ),
-//         ),
-
-//         // Bottom spacing for FAB
-//         const SizedBox(height: 100),
-//       ],
-//     );
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       backgroundColor: backgroundColor,
-//       body: SafeArea(
-//         child: FadeTransition(
-//           opacity: _fadeAnimation,
-//           child: SlideTransition(
-//             position: _slideAnimation,
-//             child: CustomScrollView(
-//               physics: const BouncingScrollPhysics(),
-//               slivers: [
-//                 SliverToBoxAdapter(
-//                   child: Padding(
-//                     padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-//                     child: Column(
-//                       crossAxisAlignment: CrossAxisAlignment.start,
-//                       children: [
-//                         _buildGreetingHeader(),
-//                         _buildMainContent(),
-//                       ],
-//                     ),
-//                   ),
-//                 ),
-//               ],
-//             ),
-//           ),
-//         ),
-//       ),
-
-//       // Enhanced Floating Action Button
-//       floatingActionButton: CustomNavBar(
-//         currentIndex: _selectedIndex,
-//         onTap: (index) {
-//           setState(() => _selectedIndex = index);
-//         },
-//         backgroundColor: backgroundColor,
-//         accentColor: accentColor,
-//         primaryColor: primaryColor,
-//         cardColor: cardColor,
-//         floatingActionButtonLocation: FloatingActionButtonLocation.centerTop,
-//       ),
-//     );
-//   }
-// }
-// ignore_for_file: deprecated_member_use, unused_local_variable, use_super_parameters, avoid_print
+// ignore_for_file: deprecated_member_use, unused_local_variable, use_super_parameters, avoid_print, use_build_context_synchronously
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:monarch/main_pages/HomePage/navbar.dart';
@@ -241,6 +8,9 @@ import 'package:monarch/support/fetch_service.dart';
 import 'package:monarch/main_pages/HomePage/hero_card.dart';
 import 'package:monarch/main_pages/HomePage/quick_actions.dart';
 import 'package:monarch/support/transcations_recent.dart';
+import 'package:http/http.dart' as http;
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:monarch/other_pages/enviroment.dart';
 
 class FinTrackHomePage extends StatefulWidget {
   const FinTrackHomePage({Key? key}) : super(key: key);
@@ -262,7 +32,6 @@ class _FinTrackHomePageState extends State<FinTrackHomePage>
   late Animation<double> _scaleAnimation;
 
   // Navigation State
-  // ignore: prefer_final_fields
   int _selectedIndex = 0;
 
   // Time-based greeting data
@@ -557,135 +326,137 @@ class _FinTrackHomePageState extends State<FinTrackHomePage>
     );
   }
 
-  // Transaction Entry Dialog (placeholder for functionality)
+  // Transaction Entry Dialog with voice functionality
   void _showTransactionEntryDialog(String type) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder:
-          (context) => Container(
-            height: MediaQuery.of(context).size.height * 0.7,
-            decoration: BoxDecoration(
-              color: cardColor,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(28),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 32,
-                  offset: const Offset(0, -8),
+    if (type == 'voice') {
+      showModalBottomSheet(
+        context: context,
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        builder: (context) => VoiceTransactionDialog(),
+      );
+    } else {
+      // Email dialog (unchanged)
+      showModalBottomSheet(
+        context: context,
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        builder:
+            (context) => Container(
+              height: MediaQuery.of(context).size.height * 0.7,
+              decoration: BoxDecoration(
+                color: cardColor,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(28),
                 ),
-              ],
-            ),
-            child: Column(
-              children: [
-                // Handle Bar
-                Container(
-                  width: 48,
-                  height: 4,
-                  margin: const EdgeInsets.only(top: 16, bottom: 24),
-                  decoration: BoxDecoration(
-                    color: primaryColor.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(2),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 32,
+                    offset: const Offset(0, -8),
                   ),
-                ),
-
-                // Dialog Content
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Header
-                        Row(
-                          children: [
-                            Container(
-                              width: 48,
-                              height: 48,
-                              decoration: BoxDecoration(
-                                color: accentColor.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: accentColor.withOpacity(0.2),
-                                  width: 1,
-                                ),
-                              ),
-                              child: Icon(
-                                type == 'email'
-                                    ? Icons.mail_outline
-                                    : Icons.mic_outlined,
-                                color: accentColor,
-                                size: 24,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  type == 'email'
-                                      ? 'Email Transaction'
-                                      : 'Voice Transaction',
-                                  style: GoogleFonts.inter(
-                                    color: primaryColor,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                Text(
-                                  type == 'email'
-                                      ? 'Forward receipts to add transactions'
-                                      : 'Speak to record your transaction',
-                                  style: GoogleFonts.inter(
-                                    color: primaryColor.withOpacity(0.6),
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 32),
-
-                        // Placeholder content
-                        Expanded(
-                          child: Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  type == 'email' ? Icons.email : Icons.mic,
-                                  size: 64,
-                                  color: accentColor.withOpacity(0.3),
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  type == 'email'
-                                      ? 'Email integration coming soon!'
-                                      : 'Voice recording coming soon!',
-                                  style: GoogleFonts.inter(
-                                    color: primaryColor.withOpacity(0.6),
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
+                ],
+              ),
+              child: Column(
+                children: [
+                  // Handle Bar
+                  Container(
+                    width: 48,
+                    height: 4,
+                    margin: const EdgeInsets.only(top: 16, bottom: 24),
+                    decoration: BoxDecoration(
+                      color: primaryColor.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                ),
-              ],
+
+                  // Dialog Content
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Header
+                          Row(
+                            children: [
+                              Container(
+                                width: 48,
+                                height: 48,
+                                decoration: BoxDecoration(
+                                  color: accentColor.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: accentColor.withOpacity(0.2),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Icon(
+                                  Icons.mail_outline,
+                                  color: accentColor,
+                                  size: 24,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Email Transaction',
+                                    style: GoogleFonts.inter(
+                                      color: primaryColor,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  Text(
+                                    'Forward receipts to add transactions',
+                                    style: GoogleFonts.inter(
+                                      color: primaryColor.withOpacity(0.6),
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 32),
+
+                          // Placeholder content
+                          Expanded(
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.email,
+                                    size: 64,
+                                    color: accentColor.withOpacity(0.3),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'Email integration coming soon!',
+                                    style: GoogleFonts.inter(
+                                      color: primaryColor.withOpacity(0.6),
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-    );
+      );
+    }
   }
 
   // Enhanced main content with better spacing
@@ -769,8 +540,6 @@ class _FinTrackHomePageState extends State<FinTrackHomePage>
                 _initializeData();
                 _updateGreeting();
                 setState(() {});
-                // Add haptic feedback
-                // HapticFeedback.lightImpact();
               },
               color: accentColor,
               backgroundColor: cardColor,
@@ -810,8 +579,6 @@ class _FinTrackHomePageState extends State<FinTrackHomePage>
               ),
             ),
           ),
-
-          // Enhanced Floating Action Button
         ),
       ),
       floatingActionButton: CustomNavBar(
@@ -823,6 +590,413 @@ class _FinTrackHomePageState extends State<FinTrackHomePage>
         accentColor: accentColor,
         primaryColor: primaryColor,
         cardColor: cardColor,
+      ),
+    );
+  }
+}
+
+// Voice Transaction Dialog Widget
+class VoiceTransactionDialog extends StatefulWidget {
+  const VoiceTransactionDialog({super.key});
+
+  @override
+  _VoiceTransactionDialogState createState() => _VoiceTransactionDialogState();
+}
+
+class _VoiceTransactionDialogState extends State<VoiceTransactionDialog>
+    with SingleTickerProviderStateMixin {
+  late stt.SpeechToText _speech;
+  bool _isListening = false;
+  String _spokenText = '';
+  bool _processing = false;
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _opacityAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _speech = stt.SpeechToText();
+
+    // Animation setup
+    _animationController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 800),
+    );
+
+    _scaleAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.2), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: 1.2, end: 1.0), weight: 1),
+    ]).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+
+    _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
+    );
+
+    _animationController.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  void _listen() async {
+    if (!_isListening) {
+      bool available = await _speech.initialize(
+        onStatus: (val) async {
+          print('Status: $val');
+          if (val == 'done') {
+            setState(() {
+              _isListening = false;
+              _processing = true;
+            });
+            await _speech.stop();
+            if (_spokenText.isNotEmpty) {
+              await _sendToBackend();
+            }
+            setState(() {
+              _processing = false;
+            });
+          }
+        },
+        onError: (val) => print('Error: $val'),
+      );
+
+      if (available) {
+        setState(() {
+          _isListening = true;
+          _spokenText = '';
+        });
+        _speech.listen(
+          onResult: (val) {
+            setState(() {
+              _spokenText = val.recognizedWords;
+            });
+          },
+        );
+      }
+    } else {
+      setState(() {
+        _isListening = false;
+        _processing = true;
+      });
+      _speech.stop();
+    }
+  }
+
+  Future<void> _sendToBackend() async {
+    try {
+      final response = await http.post(
+        Uri.parse('${Environment.baseUrl}/api/transactions/voice'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'voiceInput': _spokenText}),
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        final transactionData = responseData['data'];
+
+        // Close the bottom sheet
+        Navigator.pop(context);
+
+        // Show confirmation page
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ConfirmTransactionPage(data: transactionData),
+          ),
+        );
+      } else {
+        throw Exception('❌ Failed to process transaction');
+      }
+    } catch (e) {
+      print(e);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      setState(() {
+        _processing = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cardColor = Theme.of(context).cardColor;
+    final primaryColor = Theme.of(context).primaryColor;
+    final accentColor = Theme.of(context).colorScheme.secondary;
+
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.7,
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 32,
+            offset: const Offset(0, -8),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Handle Bar
+          Container(
+            width: 48,
+            height: 4,
+            margin: const EdgeInsets.only(top: 16, bottom: 24),
+            decoration: BoxDecoration(
+              color: primaryColor.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+
+          // Dialog Content
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header
+                  Row(
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: accentColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: accentColor.withOpacity(0.2),
+                            width: 1,
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.mic_outlined,
+                          color: accentColor,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Voice Transaction',
+                            style: GoogleFonts.inter(
+                              color: primaryColor,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          Text(
+                            'Speak to record your transaction',
+                            style: GoogleFonts.inter(
+                              color: primaryColor.withOpacity(0.6),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // Voice input content
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (_processing)
+                          Column(
+                            children: [
+                              CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  accentColor,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Processing your request...',
+                                style: GoogleFonts.inter(
+                                  color: primaryColor.withOpacity(0.6),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          )
+                        else
+                          Column(
+                            children: [
+                              // Animated microphone button
+                              ScaleTransition(
+                                scale:
+                                    _isListening
+                                        ? _scaleAnimation
+                                        : AlwaysStoppedAnimation(1.0),
+                                child: Container(
+                                  width: 100,
+                                  height: 100,
+                                  decoration: BoxDecoration(
+                                    color:
+                                        _isListening
+                                            ? accentColor.withOpacity(0.2)
+                                            : accentColor.withOpacity(0.1),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color:
+                                          _isListening
+                                              ? accentColor
+                                              : accentColor.withOpacity(0.3),
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: IconButton(
+                                    icon: Icon(
+                                      _isListening ? Icons.mic : Icons.mic_none,
+                                      size: 40,
+                                      color:
+                                          _isListening
+                                              ? accentColor
+                                              : primaryColor.withOpacity(0.6),
+                                    ),
+                                    onPressed: _listen,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+
+                              // Status text
+                              Text(
+                                _isListening
+                                    ? 'Listening...'
+                                    : 'Tap the microphone to start',
+                                style: GoogleFonts.inter(
+                                  color: primaryColor.withOpacity(0.6),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+
+                              const SizedBox(height: 16),
+
+                              // Speech text with smooth appearance
+                              AnimatedOpacity(
+                                opacity: _spokenText.isNotEmpty ? 1.0 : 0.0,
+                                duration: Duration(milliseconds: 300),
+                                child: Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: primaryColor.withOpacity(0.05),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    _spokenText,
+                                    style: GoogleFonts.inter(
+                                      color: primaryColor,
+                                      fontSize: 16,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Confirm Transaction Page
+class ConfirmTransactionPage extends StatelessWidget {
+  final Map<String, dynamic> data;
+
+  const ConfirmTransactionPage({super.key, required this.data});
+
+  Future<void> _saveTransaction(BuildContext context) async {
+    const String saveUrl = '${Environment.baseUrl}/api/transaction/add';
+
+    try {
+      final response = await http.post(
+        Uri.parse(saveUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'description': data['description'],
+          'amount': data['amount'],
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('✅ Transaction Saved!')));
+        Navigator.popUntil(context, (route) => route.isFirst);
+      } else {
+        throw Exception('❌ Save failed');
+      }
+    } catch (e) {
+      print(e);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final amount = data['amount'];
+    final description = data['description'];
+    final category = data['category'];
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Confirm Transaction'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            Text(
+              "💬 Description: $description",
+              style: const TextStyle(fontSize: 18),
+            ),
+            Text("💰 Amount: ₹$amount", style: const TextStyle(fontSize: 18)),
+            Text(
+              "📂 Category: $category",
+              style: const TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 30),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.check),
+              label: const Text('Confirm & Save'),
+              onPressed: () => _saveTransaction(context),
+            ),
+            const SizedBox(height: 10),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Edit or Cancel'),
+            ),
+          ],
+        ),
       ),
     );
   }
