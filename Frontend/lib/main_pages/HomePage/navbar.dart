@@ -1,14 +1,11 @@
 // ignore_for_file: deprecated_member_use
 
-import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:monarch/support/add.dart';
-import 'package:monarch/main_pages/HomePage/homepage.dart';
-import 'package:monarch/main_pages/Statistics/statistics.dart';
+import 'package:monarch/other_pages/colors.dart';
 
 class CustomNavBar extends StatelessWidget {
   final int currentIndex;
-  final void Function(int) onTap;
+  final Function(int) onTap;
   final Color backgroundColor;
   final Color accentColor;
   final Color primaryColor;
@@ -24,100 +21,86 @@ class CustomNavBar extends StatelessWidget {
     required this.cardColor,
   });
 
-  // Navigation items
-  final List _navItems = const [
-    NavItem(icon: Icons.home_rounded, index: 0, page: FinTrackHomePage()),
-    NavItem(icon: Icons.bar_chart_rounded, index: 1, page: Statistics()),
-    NavItem(icon: Icons.settings_rounded, index: 2, page: AddExpenseScreen()),
-  ];
-
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 20),
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        height: 72,
-        width: MediaQuery.of(context).size.width * 0.7, // centered & responsive
-        decoration: BoxDecoration(
-          color: cardColor.withOpacity(0.65),
-          borderRadius: BorderRadius.circular(40),
-          boxShadow: [
-            BoxShadow(
-              color: primaryColor.withOpacity(0.15),
-              blurRadius: 30,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(40),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children:
-                  _navItems
-                      .map((item) => _buildNavItem(context, item))
-                      .toList(),
-            ),
+    return Container(
+      height: 80, // Fixed height for bottom navigation
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, -2),
           ),
-        ),
+        ],
       ),
-    );
-  }
-
-  Widget _buildNavItem(BuildContext context, NavItem item) {
-    final isActive = currentIndex == item.index;
-    return GestureDetector(
-      onTap: () {
-        onTap(item.index);
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => item.page),
-        );
-      },
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 250),
-            width: isActive ? 38 : 30,
-            height: isActive ? 38 : 30,
-            decoration: BoxDecoration(
-              color:
-                  isActive
-                      ? primaryColor.withOpacity(0.15)
-                      : Colors.transparent,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Icon(
-              item.icon,
-              color: isActive ? primaryColor : primaryColor.withOpacity(0.4),
-              size: 24,
-            ),
+          _buildNavItem(
+            icon: Icons.home_outlined,
+            activeIcon: Icons.home_rounded,
+            label: 'Home',
+            index: 0,
           ),
-          const SizedBox(height: 4),
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 250),
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(
-              color: isActive ? accentColor : Colors.transparent,
-              shape: BoxShape.circle,
-            ),
+          _buildNavItem(
+            icon: Icons.analytics_outlined,
+            activeIcon: Icons.analytics_rounded,
+            label: 'Analytics',
+            index: 1,
+          ),
+          _buildNavItem(
+            icon: Icons.account_balance_wallet_outlined,
+            activeIcon: Icons.account_balance_wallet_rounded,
+            label: 'Budget',
+            index: 2,
+          ),
+          _buildNavItem(
+            icon: Icons.person_outlined,
+            activeIcon: Icons.person_rounded,
+            label: 'Profile',
+            index: 3,
           ),
         ],
       ),
     );
   }
-}
 
-// Nav item model
-class NavItem {
-  final IconData icon;
-  final int index;
-  final Widget page;
-  const NavItem({required this.icon, required this.index, required this.page});
+  Widget _buildNavItem({
+    required IconData icon,
+    required IconData activeIcon,
+    required String label,
+    required int index,
+  }) {
+    final isActive = currentIndex == index;
+
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => onTap(index),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                isActive ? activeIcon : icon,
+                color: isActive ? accentColor : primaryColor.withOpacity(0.6),
+                size: 24,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  color: isActive ? accentColor : primaryColor.withOpacity(0.6),
+                  fontSize: 12,
+                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
