@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:monarch/main_pages/HomePage/transaction_button.dart';
+import 'package:monarch/main_pages/HomePage/Components/Home/transaction_button.dart';
 import 'package:monarch/other_pages/colors.dart';
 
 class GreetingHeader extends StatelessWidget {

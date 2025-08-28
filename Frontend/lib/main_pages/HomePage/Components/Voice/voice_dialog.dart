@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:monarch/speech.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:monarch/other_pages/colors.dart';
 import 'package:monarch/other_pages/enviroment.dart';
@@ -103,10 +104,17 @@ class _VoiceTransactionDialogState extends State<VoiceTransactionDialog>
 
   Future<void> _sendToBackend() async {
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getString('userId');
+
+      if (userId == null) {
+        throw Exception('User ID not found. Please log in again.');
+      }
+
       final response = await http.post(
         Uri.parse('${Environment.baseUrl}/api/transactions/voice'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'voiceInput': _spokenText}),
+        body: jsonEncode({'userId': userId, 'voiceInput': _spokenText}),
       );
 
       if (response.statusCode == 200) {
@@ -120,28 +128,13 @@ class _VoiceTransactionDialogState extends State<VoiceTransactionDialog>
             builder: (context) => ConfirmTransactionPage(data: transactionData),
           ),
         );
-
-        _showCustomSnackBar(
-          message: 'Transaction processed successfully!',
-          icon: Icons.check_circle,
-          backgroundColor: const Color(0xFF4CAF50),
-          iconColor: Colors.white,
-          duration: const Duration(seconds: 2),
-        );
       } else {
-        throw Exception('Failed to process transaction');
+        throw Exception('Save failed with status: ${response.statusCode}');
       }
     } catch (e) {
-      _showCustomSnackBar(
-        message: 'Error processing transaction: ${e.toString()}',
-        icon: Icons.error_outline,
-        backgroundColor: const Color(0xFFFF6B6B),
-        iconColor: Colors.white,
-        duration: const Duration(seconds: 4),
-      );
-      setState(() {
-        _processing = false;
-      });
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
     }
   }
 

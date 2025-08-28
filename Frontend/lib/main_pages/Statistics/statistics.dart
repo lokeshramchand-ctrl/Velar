@@ -7,12 +7,13 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:monarch/other_pages/colors.dart';
 import 'package:monarch/support/add.dart';
 import 'package:monarch/other_pages/enviroment.dart';
 import 'package:monarch/main_pages/Statistics/Budget/update_budget.dart';
 import 'package:monarch/main_pages/Statistics/Budget/budget_manager.dart';
 import 'package:monarch/main_pages/HomePage/homepage.dart';
-import 'package:monarch/main_pages/HomePage/navbar.dart';
+import 'package:monarch/main_pages/HomePage/Components/Home/navbar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Transaction {
@@ -62,12 +63,6 @@ class StatisticsState extends State<Statistics> with TickerProviderStateMixin {
   String selectedCategory = 'All';
   Map<String, double> totalAmountPerCategory = {};
   // Color Scheme
-  final Color backgroundColor = const Color(0xFFF8F9FA);
-  final Color primaryColor = const Color(0xFF2D3436);
-  final Color accentColor = const Color(0xFF00B894);
-  final Color cardColor = const Color(0xFFFFFFFF);
-  final Color textSecondary = const Color(0xFF636E72);
-  final Color surfaceColor = const Color(0xFFF1F2F6);
 
   // Responsive methods
   double responsiveWidth(double size) =>

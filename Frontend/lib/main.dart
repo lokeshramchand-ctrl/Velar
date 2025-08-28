@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const FinTrackHomePage(),
+      home: const LoginScreen(),
 
       // home: const SpeechInputPage(),
     );

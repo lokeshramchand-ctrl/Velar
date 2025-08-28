@@ -4,8 +4,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:monarch/other_pages/reponsive.dart';
 import 'package:monarch/other_pages/colors.dart';
 import 'package:monarch/other_pages/enviroment.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ConfirmTransactionPage extends StatelessWidget {
   final Map<String, dynamic> data;
@@ -13,16 +15,27 @@ class ConfirmTransactionPage extends StatelessWidget {
   const ConfirmTransactionPage({super.key, required this.data});
 
   Future<void> _saveTransaction(BuildContext context) async {
-    const String saveUrl = '${Environment.baseUrl}/api/transaction/add';
+    const String saveUrl =
+        '${Environment.baseUrl}/api/transaction/add'; // ✅ make sure this matches backend
 
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getString('userId');
+
+      if (userId == null) {
+        throw Exception('User ID not found. Please log in again.');
+      }
+
       final response = await http.post(
         Uri.parse(saveUrl),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'description': data['description'],
-          'amount': data['amount'],
-          'category': data['category'],
+          'userId': userId,
+          'description': data['description'] ?? '',
+          'amount':
+              double.tryParse(data['amount'].toString()) ??
+              0.0, // ✅ force number
+          'category': data['category'] ?? 'Uncategorized',
           'date': data['date'] ?? DateTime.now().toIso8601String(),
         }),
       );
@@ -38,7 +51,8 @@ class ConfirmTransactionPage extends StatelessWidget {
         );
         Navigator.popUntil(context, (route) => route.isFirst);
       } else {
-        throw Exception('Save failed with status: ${response.statusCode}');
+        // 👇 Log backend response
+        throw Exception('Save failed: ${response.statusCode} ${response.body}');
       }
     } catch (e) {
       _showCustomSnackBar(
@@ -53,35 +67,56 @@ class ConfirmTransactionPage extends StatelessWidget {
   }
 
   void _showCustomSnackBar({
-    required BuildContext context,
     required String message,
     required IconData icon,
     required Color backgroundColor,
     required Color iconColor,
-    required Duration duration,
+    Duration duration = const Duration(seconds: 3),
+    required BuildContext context,
   }) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Row(
-          children: [
-            Icon(icon, color: iconColor),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                message,
-                style: GoogleFonts.inter(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
+        content: Container(
+          padding: EdgeInsets.symmetric(vertical: context.responsiveHeight(4)),
+          child: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(context.responsiveWidth(8)),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(
+                    context.responsiveWidth(8),
+                  ),
+                ),
+                child: Icon(
+                  icon,
+                  color: iconColor,
+                  size: context.responsiveText(20),
                 ),
               ),
-            ),
-          ],
+              SizedBox(width: context.responsiveWidth(12)),
+              Expanded(
+                child: Text(
+                  message,
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                    fontSize: context.responsiveText(14),
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
         backgroundColor: backgroundColor,
-        duration: duration,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(context.responsiveWidth(12)),
+        ),
+        margin: EdgeInsets.all(context.responsiveWidth(16)),
+        duration: duration,
+        elevation: 8,
       ),
     );
   }

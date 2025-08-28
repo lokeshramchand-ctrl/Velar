@@ -212,13 +212,18 @@ app.get('/api/transactions/recent', async (req, res) => {
 //VOICE
 app.post('/api/transactions/voice', async (req, res) => {
   try {
-    const { voiceInput } = req.body;
+    const { voiceInput, userId } = req.body;  // ✅ take userId from body
     if (!voiceInput) {
       return res.status(400).json({ error: 'No voice input provided' });
     }
+    if (!userId) {
+      return res.status(400).json({ error: 'Missing userId' }); // ✅ enforce userId like others
+    }
+
     // Step 1: Use regex to extract amount
     const amountMatch = voiceInput.match(/(?:\₹|\$)?(\d+(?:\.\d{1,2})?)/);
     const amount = amountMatch ? parseFloat(amountMatch[1]) : null;
+
     // Step 2: Extract description (rough logic: remove common verbs + amount)
     const cleaned = voiceInput
       .toLowerCase()
@@ -226,19 +231,24 @@ app.post('/api/transactions/voice', async (req, res) => {
       .replace(/₹?\d+/, '')
       .trim();
     const description = cleaned || 'misc';
-    // Step 3: Predict category using your Flask API
+
+    // Step 3: Predict category using Flask API
     const predictRes = await axios.post('http://192.168.1.9:5000/api/predict', {
       description,
     });
     const category = predictRes.data?.category || 'Other';
+
     // Step 4: Save to DB
     const newTransaction = new Transaction({
+      userId,         // ✅ store userId
       description,
       amount,
       category,
       source: 'voice'
     });
+
     await newTransaction.save();
+
     res.status(200).json({
       message: '✅ Voice transaction saved',
       data: newTransaction,

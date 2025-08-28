@@ -115,7 +115,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
-import 'package:monarch/emai_screen.dart';
+import 'package:monarch/main_pages/HomePage/Components/Voice/voice_dialog.dart';
 //import 'package:monarch/email.dart';
 import 'package:monarch/other_pages/enviroment.dart';
 import 'dart:convert';
@@ -181,12 +181,13 @@ class _LoginScreenState extends State<LoginScreen> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
+              builder: (_) => VoiceTransactionDialog(),
               // builder:
               //     (_) => EmailsScreen(
               //       accessToken: accessToken,
               //       userId: data['user']['_id'],
               //     ),
-              builder: (_) => AutoSyncEmailsScreen(accessToken: accessToken,userId: data['user']['_id'],),
+              //builder: (_) => AutoSyncEmailsScreen(accessToken: accessToken,userId: data['user']['_id'],),
             ),
           );
         } else {
