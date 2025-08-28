@@ -1,7 +1,6 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
-import 'package:monarch/other_pages/colors.dart';
 
 class CustomNavBar extends StatelessWidget {
   final int currentIndex;
