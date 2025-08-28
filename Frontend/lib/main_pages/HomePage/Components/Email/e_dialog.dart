@@ -161,7 +161,7 @@ class _EmailTransactionDialogState extends State<EmailTransactionDialog>
           setState(() {
             _loading = false;
             _syncedCount = data['count'];
-            _status = "✅ Synced $_syncedCount transactions successfully!";
+            _status = "Synced";
           });
 
           _rotationController.stop();
@@ -173,21 +173,21 @@ class _EmailTransactionDialogState extends State<EmailTransactionDialog>
         } else {
           setState(() {
             _loading = false;
-            _status = "❌ Sync failed: Unexpected response format";
+            _status = " Sync failed: Unexpected response format";
           });
           _rotationController.stop();
         }
       } else {
         setState(() {
           _loading = false;
-          _status = "❌ Backend error: ${response.body}";
+          _status = "Backend error: ${response.body}";
         });
         _rotationController.stop();
       }
     } catch (error) {
       setState(() {
         _loading = false;
-        _status = "⚠️ Network or unexpected error: $error";
+        _status = "Network error: $error";
       });
       _rotationController.stop();
     }
@@ -509,11 +509,7 @@ class _EmailTransactionDialogState extends State<EmailTransactionDialog>
                 ),
               ),
               child: Icon(
-                isSuccess
-                    ? Icons.check_circle_rounded
-                    : isError
-                    ? Icons.error_rounded
-                    : Icons.info_rounded,
+                Icons.check_circle_rounded,
                 color:
                     isSuccess
                         ? Colors.green
@@ -579,14 +575,9 @@ class _EmailTransactionDialogState extends State<EmailTransactionDialog>
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        Icons.refresh_rounded,
-                        color: Colors.white,
-                        size: context.responsiveWidth(20),
-                      ),
                       SizedBox(width: context.responsiveWidth(8)),
                       Text(
-                        "Retry Sync",
+                        "Update",
                         style: GoogleFonts.inter(
                           color: Colors.white,
                           fontSize: context.responsiveText(14),
