@@ -110,11 +110,13 @@
 //     );
 //   }
 // }
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, unused_import
 
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
+import 'package:monarch/main_pages/HomePage/homepage.dart';
+
 import 'package:monarch/main_pages/HomePage/Components/Voice/voice_dialog.dart';
 //import 'package:monarch/email.dart';
 import 'package:monarch/other_pages/enviroment.dart';
@@ -181,7 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (_) => VoiceTransactionDialog(),
+              builder: (_) => FinTrackHomePage(),
               // builder:
               //     (_) => EmailsScreen(
               //       accessToken: accessToken,
