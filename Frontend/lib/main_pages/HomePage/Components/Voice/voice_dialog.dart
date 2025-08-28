@@ -1,14 +1,30 @@
 // ignore_for_file: depend_on_referenced_packages, library_private_types_in_public_api, use_build_context_synchronously, deprecated_member_use
-
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
-import 'package:monarch/speech.dart';
+import 'package:monarch/testing_pages/speech.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:monarch/other_pages/colors.dart';
 import 'package:monarch/other_pages/enviroment.dart';
+
+extension ResponsiveExtension on BuildContext {
+  double responsiveWidth(double size) {
+    return size * (MediaQuery.of(this).size.width / 375);
+  }
+
+  double responsiveHeight(double size) {
+    return size * (MediaQuery.of(this).size.height / 812);
+  }
+
+  double responsiveText(double size) {
+    final width = MediaQuery.of(this).size.width;
+    if (width < 350) return size * 0.9;
+    if (width > 600) return size * 1.2;
+    return size;
+  }
+}
 
 class VoiceTransactionDialog extends StatefulWidget {
   const VoiceTransactionDialog({super.key});
@@ -18,32 +34,82 @@ class VoiceTransactionDialog extends StatefulWidget {
 }
 
 class _VoiceTransactionDialogState extends State<VoiceTransactionDialog>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late stt.SpeechToText _speech;
   bool _isListening = false;
   String _spokenText = '';
   bool _processing = false;
+
+  // Animation controllers
   late AnimationController _pulseController;
+  late AnimationController _waveController;
+  late AnimationController _slideController;
+  late AnimationController _fadeController;
+
+  // Animations
   late Animation<double> _pulseAnimation;
+  late Animation<double> _waveAnimation;
+  late Animation<Offset> _slideAnimation;
+  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
     _speech = stt.SpeechToText();
 
+    // Initialize animation controllers
     _pulseController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1200),
+      duration: const Duration(milliseconds: 1500),
     );
 
-    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.15).animate(
+    _waveController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    );
+
+    _slideController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+
+    _fadeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+
+    // Initialize animations
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
+
+    _waveAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _waveController, curve: Curves.elasticOut),
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.3),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+    );
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
+
+    // Start initial animations
+    _slideController.forward();
+    _fadeController.forward();
   }
 
   @override
   void dispose() {
     _pulseController.dispose();
+    _waveController.dispose();
+    _slideController.dispose();
+    _fadeController.dispose();
     super.dispose();
   }
 
@@ -57,10 +123,13 @@ class _VoiceTransactionDialogState extends State<VoiceTransactionDialog>
               _processing = true;
             });
             _pulseController.stop();
+            _waveController.stop();
             await _speech.stop();
+
             if (_spokenText.isNotEmpty) {
               await _sendToBackend();
             }
+
             setState(() {
               _processing = false;
             });
@@ -69,10 +138,7 @@ class _VoiceTransactionDialogState extends State<VoiceTransactionDialog>
         onError: (val) {
           _showCustomSnackBar(
             message: 'Speech recognition error: $val',
-            icon: Icons.mic_off,
-            backgroundColor: const Color(0xFFFF6B6B),
-            iconColor: Colors.white,
-            duration: const Duration(seconds: 3),
+            isError: true,
           );
         },
       );
@@ -82,7 +148,9 @@ class _VoiceTransactionDialogState extends State<VoiceTransactionDialog>
           _isListening = true;
           _spokenText = '';
         });
+
         _pulseController.repeat(reverse: true);
+        _waveController.repeat();
 
         _speech.listen(
           onResult: (val) {
@@ -97,7 +165,9 @@ class _VoiceTransactionDialogState extends State<VoiceTransactionDialog>
         _isListening = false;
         _processing = true;
       });
+
       _pulseController.stop();
+      _waveController.stop();
       _speech.stop();
     }
   }
@@ -132,335 +202,522 @@ class _VoiceTransactionDialogState extends State<VoiceTransactionDialog>
         throw Exception('Save failed with status: ${response.statusCode}');
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+      _showCustomSnackBar(message: 'Error: ${e.toString()}', isError: true);
     }
   }
 
-  void _showCustomSnackBar({
-    required String message,
-    required IconData icon,
-    required Color backgroundColor,
-    required Color iconColor,
-    required Duration duration,
-  }) {
+  void _showCustomSnackBar({required String message, bool isError = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
           children: [
-            Icon(icon, color: iconColor),
-            const SizedBox(width: 12),
+            Icon(
+              isError ? Icons.error_outline : Icons.check_circle_outline,
+              color: Colors.white,
+              size: context.responsiveWidth(20),
+            ),
+            SizedBox(width: context.responsiveWidth(12)),
             Expanded(
               child: Text(
                 message,
                 style: GoogleFonts.inter(
                   color: Colors.white,
+                  fontSize: context.responsiveText(14),
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ),
           ],
         ),
-        backgroundColor: backgroundColor,
-        duration: duration,
+        backgroundColor:
+            isError ? const Color(0xFFFF6B6B) : const Color(0xFF4CAF50),
+        duration: const Duration(seconds: 3),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(context.responsiveWidth(16)),
+        ),
+        margin: EdgeInsets.all(context.responsiveWidth(16)),
       ),
+    );
+  }
+
+  Widget _buildWaveIndicator() {
+    return AnimatedBuilder(
+      animation: _waveAnimation,
+      builder: (context, child) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(5, (index) {
+            final delay = index * 0.2;
+            final animValue = (_waveAnimation.value - delay).clamp(0.0, 1.0);
+            final height = 4 + (animValue * 20);
+
+            return Container(
+              margin: EdgeInsets.symmetric(
+                horizontal: context.responsiveWidth(2),
+              ),
+              width: context.responsiveWidth(4),
+              height: context.responsiveHeight(height),
+              decoration: BoxDecoration(
+                color: accentColor.withOpacity(0.8),
+                borderRadius: BorderRadius.circular(context.responsiveWidth(2)),
+              ),
+            );
+          }),
+        );
+      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.85, // Reduced height
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.15),
-            blurRadius: 32,
-            offset: const Offset(0, -12),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Handle Bar
-          Container(
-            width: 48,
-            height: 4,
-            margin: const EdgeInsets.only(top: 16, bottom: 8),
-            decoration: BoxDecoration(
-              color: primaryColor.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-
-          // Header
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              24,
-              16,
-              24,
-              16,
-            ), // Added bottom padding
-            child: Row(
-              children: [
-                Container(
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    color: accentColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: accentColor.withOpacity(0.2),
-                      width: 1.5,
-                    ),
-                  ),
-                  child: Icon(Icons.mic_outlined, color: accentColor, size: 28),
+    return AnimatedBuilder(
+      animation: Listenable.merge([_slideController, _fadeController]),
+      builder: (context, child) {
+        return SlideTransition(
+          position: _slideAnimation,
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: Container(
+              height: context.responsiveHeight(680),
+              decoration: BoxDecoration(
+                color: cardColor,
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(context.responsiveWidth(32)),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Voice Transaction',
-                        style: GoogleFonts.inter(
-                          color: primaryColor,
-                          fontSize: 20, // Reduced font size
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 4), // Added spacing
-                      Text(
-                        'Speak naturally to record your transaction',
-                        style: GoogleFonts.inter(
-                          color: primaryColor.withOpacity(0.6),
-                          fontSize: 12, // Reduced font size
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: context.responsiveWidth(40),
+                    offset: Offset(0, -context.responsiveHeight(8)),
                   ),
-                ),
-              ],
-            ),
-          ),
-
-          // Main content with SingleChildScrollView to prevent overflow
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                ],
+              ),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Status Card
+                  // Handle Bar
                   Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
+                    width: context.responsiveWidth(48),
+                    height: context.responsiveHeight(4),
+                    margin: EdgeInsets.only(
+                      top: context.responsiveHeight(20),
+                      bottom: context.responsiveHeight(8),
+                    ),
                     decoration: BoxDecoration(
-                      color:
-                          _isListening
-                              ? accentColor.withOpacity(0.08)
-                              : backgroundColor,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color:
-                            _isListening
-                                ? accentColor.withOpacity(0.2)
-                                : primaryColor.withOpacity(0.1),
-                        width: 1.5,
+                      color: primaryColor.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(
+                        context.responsiveWidth(2),
                       ),
                     ),
-                    child: Column(
+                  ),
+
+                  // Header
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      context.responsiveWidth(24),
+                      context.responsiveHeight(20),
+                      context.responsiveWidth(24),
+                      context.responsiveHeight(20),
+                    ),
+                    child: Row(
                       children: [
-                        // Microphone Button
-                        AnimatedBuilder(
-                          animation: _pulseAnimation,
-                          builder: (context, child) {
-                            return Transform.scale(
-                              scale: _isListening ? _pulseAnimation.value : 1.0,
-                              child: GestureDetector(
-                                onTap: _processing ? null : _listen,
-                                child: Container(
-                                  width: 80, // Reduced size
-                                  height: 80, // Reduced size
-                                  decoration: BoxDecoration(
-                                    color:
-                                        _isListening
-                                            ? accentColor.withOpacity(0.15)
-                                            : primaryColor.withOpacity(0.05),
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color:
-                                          _isListening
-                                              ? accentColor.withOpacity(0.4)
-                                              : primaryColor.withOpacity(0.15),
-                                      width: 2.5,
-                                    ),
-                                    boxShadow:
-                                        _isListening
-                                            ? [
-                                              BoxShadow(
-                                                color: accentColor.withOpacity(
-                                                  0.2,
-                                                ),
-                                                blurRadius: 20,
-                                                spreadRadius: 0,
-                                              ),
-                                            ]
-                                            : null,
-                                  ),
-                                  child:
-                                      _processing
-                                          ? const CircularProgressIndicator(
-                                            strokeWidth: 3,
-                                            valueColor:
-                                                AlwaysStoppedAnimation<Color>(
-                                                  Colors.blue,
-                                                ),
-                                          )
-                                          : Icon(
-                                            _isListening
-                                                ? Icons.mic
-                                                : Icons.mic_none,
-                                            size: 36, // Reduced size
-                                            color:
-                                                _isListening
-                                                    ? accentColor
-                                                    : primaryColor.withOpacity(
-                                                      0.6,
-                                                    ),
-                                          ),
+                        Container(
+                          width: context.responsiveWidth(56),
+                          height: context.responsiveWidth(56),
+                          decoration: BoxDecoration(
+                            color: accentColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(
+                              context.responsiveWidth(18),
+                            ),
+                            border: Border.all(
+                              color: accentColor.withOpacity(0.3),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.mic_outlined,
+                            color: accentColor,
+                            size: context.responsiveWidth(28),
+                          ),
+                        ),
+                        SizedBox(width: context.responsiveWidth(16)),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Voice Transaction',
+                                style: GoogleFonts.inter(
+                                  color: primaryColor,
+                                  fontSize: context.responsiveText(22),
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: -0.5,
                                 ),
                               ),
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 16), // Reduced spacing
-                        // Status Text
-                        Text(
-                          _processing
-                              ? 'Processing your request...'
-                              : _isListening
-                              ? 'Listening... Tap to stop'
-                              : 'Tap microphone to start recording',
-                          style: GoogleFonts.inter(
-                            color:
-                                _isListening || _processing
-                                    ? accentColor
-                                    : primaryColor.withOpacity(0.7),
-                            fontSize: 14, // Reduced font size
-                            fontWeight: FontWeight.w600,
+                              SizedBox(height: context.responsiveHeight(6)),
+                              Text(
+                                'Speak naturally to record your transaction',
+                                style: GoogleFonts.inter(
+                                  color: primaryColor.withOpacity(0.65),
+                                  fontSize: context.responsiveText(14),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
                           ),
-                          textAlign: TextAlign.center,
                         ),
                       ],
                     ),
                   ),
 
-                  const SizedBox(height: 20), // Reduced spacing
-                  // Spoken Text Display
-                  if (_spokenText.isNotEmpty) ...[
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16), // Reduced padding
-                      decoration: BoxDecoration(
-                        color: cardColor,
-                        borderRadius: BorderRadius.circular(
-                          16,
-                        ), // Reduced radius
-                        border: Border.all(
-                          color: accentColor.withOpacity(0.15),
-                          width: 1.5,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: accentColor.withOpacity(0.05),
-                            blurRadius: 8, // Reduced blur
-                            offset: const Offset(0, 2), // Reduced offset
-                          ),
-                        ],
+                  // Main Content
+                  Expanded(
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: context.responsiveWidth(24),
+                        vertical: context.responsiveHeight(8),
                       ),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              Icon(Icons.email, color: accentColor, size: 16),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Transcript',
-                                style: GoogleFonts.inter(
-                                  color: accentColor,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 0.5,
+                          // Voice Input Card
+                          Container(
+                            width: double.infinity,
+                            padding: EdgeInsets.all(
+                              context.responsiveWidth(24),
+                            ),
+                            decoration: BoxDecoration(
+                              gradient:
+                                  _isListening
+                                      ? LinearGradient(
+                                        colors: [
+                                          accentColor.withOpacity(0.05),
+                                          accentColor.withOpacity(0.12),
+                                        ],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      )
+                                      : LinearGradient(
+                                        colors: [
+                                          backgroundColor,
+                                          backgroundColor.withOpacity(0.8),
+                                        ],
+                                      ),
+                              borderRadius: BorderRadius.circular(
+                                context.responsiveWidth(24),
+                              ),
+                              border: Border.all(
+                                color:
+                                    _isListening
+                                        ? accentColor.withOpacity(0.3)
+                                        : primaryColor.withOpacity(0.08),
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                // Microphone Button
+                                AnimatedBuilder(
+                                  animation: _pulseAnimation,
+                                  builder: (context, child) {
+                                    return Transform.scale(
+                                      scale:
+                                          _isListening
+                                              ? _pulseAnimation.value
+                                              : 1.0,
+                                      child: GestureDetector(
+                                        onTap: _processing ? null : _listen,
+                                        child: Container(
+                                          width: context.responsiveWidth(96),
+                                          height: context.responsiveWidth(96),
+                                          decoration: BoxDecoration(
+                                            gradient:
+                                                _isListening
+                                                    ? RadialGradient(
+                                                      colors: [
+                                                        accentColor.withOpacity(
+                                                          0.2,
+                                                        ),
+                                                        accentColor.withOpacity(
+                                                          0.05,
+                                                        ),
+                                                      ],
+                                                    )
+                                                    : RadialGradient(
+                                                      colors: [
+                                                        primaryColor
+                                                            .withOpacity(0.08),
+                                                        primaryColor
+                                                            .withOpacity(0.02),
+                                                      ],
+                                                    ),
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color:
+                                                  _isListening
+                                                      ? accentColor.withOpacity(
+                                                        0.4,
+                                                      )
+                                                      : primaryColor
+                                                          .withOpacity(0.2),
+                                              width: 2.5,
+                                            ),
+                                            boxShadow:
+                                                _isListening
+                                                    ? [
+                                                      BoxShadow(
+                                                        color: accentColor
+                                                            .withOpacity(0.3),
+                                                        blurRadius: context
+                                                            .responsiveWidth(
+                                                              24,
+                                                            ),
+                                                        spreadRadius: 0,
+                                                      ),
+                                                    ]
+                                                    : [
+                                                      BoxShadow(
+                                                        color: primaryColor
+                                                            .withOpacity(0.1),
+                                                        blurRadius: context
+                                                            .responsiveWidth(
+                                                              12,
+                                                            ),
+                                                        offset: Offset(
+                                                          0,
+                                                          context
+                                                              .responsiveHeight(
+                                                                4,
+                                                              ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                          ),
+                                          child:
+                                              _processing
+                                                  ? SizedBox(
+                                                    width: context
+                                                        .responsiveWidth(32),
+                                                    height: context
+                                                        .responsiveWidth(32),
+                                                    child: CircularProgressIndicator(
+                                                      strokeWidth: 3,
+                                                      valueColor:
+                                                          AlwaysStoppedAnimation<
+                                                            Color
+                                                          >(accentColor),
+                                                    ),
+                                                  )
+                                                  : Icon(
+                                                    _isListening
+                                                        ? Icons.mic
+                                                        : Icons.mic_none,
+                                                    size: context
+                                                        .responsiveWidth(42),
+                                                    color:
+                                                        _isListening
+                                                            ? accentColor
+                                                            : primaryColor
+                                                                .withOpacity(
+                                                                  0.7,
+                                                                ),
+                                                  ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+
+                                SizedBox(height: context.responsiveHeight(20)),
+
+                                // Wave Indicator (only when listening)
+                                if (_isListening) ...[
+                                  _buildWaveIndicator(),
+                                  SizedBox(
+                                    height: context.responsiveHeight(16),
+                                  ),
+                                ],
+
+                                // Status Text
+                                AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 300),
+                                  child: Text(
+                                    _processing
+                                        ? 'Processing your request...'
+                                        : _isListening
+                                        ? 'Listening... Tap to stop'
+                                        : 'Tap microphone to start recording',
+                                    key: ValueKey(
+                                      _processing
+                                          ? 'processing'
+                                          : _isListening
+                                          ? 'listening'
+                                          : 'idle',
+                                    ),
+                                    style: GoogleFonts.inter(
+                                      color:
+                                          _isListening || _processing
+                                              ? accentColor
+                                              : primaryColor.withOpacity(0.7),
+                                      fontSize: context.responsiveText(16),
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 0.2,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          SizedBox(height: context.responsiveHeight(24)),
+
+                          // Transcript Display
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 500),
+                            curve: Curves.easeOutCubic,
+                            height: _spokenText.isNotEmpty ? null : 0,
+                            child:
+                                _spokenText.isNotEmpty
+                                    ? Container(
+                                      width: double.infinity,
+                                      padding: EdgeInsets.all(
+                                        context.responsiveWidth(20),
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: cardColor,
+                                        borderRadius: BorderRadius.circular(
+                                          context.responsiveWidth(20),
+                                        ),
+                                        border: Border.all(
+                                          color: accentColor.withOpacity(0.2),
+                                          width: 1.5,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: accentColor.withOpacity(
+                                              0.08,
+                                            ),
+                                            blurRadius: context.responsiveWidth(
+                                              16,
+                                            ),
+                                            offset: Offset(
+                                              0,
+                                              context.responsiveHeight(4),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                Icons.transcribe_outlined,
+                                                color: accentColor,
+                                                size: context.responsiveWidth(
+                                                  18,
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                width: context.responsiveWidth(
+                                                  8,
+                                                ),
+                                              ),
+                                              Text(
+                                                'Transcript',
+                                                style: GoogleFonts.inter(
+                                                  color: accentColor,
+                                                  fontSize: context
+                                                      .responsiveText(13),
+                                                  fontWeight: FontWeight.w700,
+                                                  letterSpacing: 0.8,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(
+                                            height: context.responsiveHeight(
+                                              12,
+                                            ),
+                                          ),
+                                          Text(
+                                            _spokenText,
+                                            style: GoogleFonts.inter(
+                                              color: primaryColor,
+                                              fontSize: context.responsiveText(
+                                                15,
+                                              ),
+                                              fontWeight: FontWeight.w500,
+                                              height: 1.5,
+                                              letterSpacing: 0.1,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                    : const SizedBox.shrink(),
+                          ),
+
+                          SizedBox(height: context.responsiveHeight(32)),
+
+                          // Close Button
+                          Container(
+                            width: double.infinity,
+                            height: context.responsiveHeight(56),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  primaryColor.withOpacity(0.06),
+                                  primaryColor.withOpacity(0.12),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(
+                                context.responsiveWidth(16),
+                              ),
+                              border: Border.all(
+                                color: primaryColor.withOpacity(0.15),
+                                width: 1,
+                              ),
+                            ),
+                            child: Material(
+                              color: Colors.transparent,
+                              borderRadius: BorderRadius.circular(
+                                context.responsiveWidth(16),
+                              ),
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(
+                                  context.responsiveWidth(16),
+                                ),
+                                onTap: () => Navigator.pop(context),
+                                child: Center(
+                                  child: Text(
+                                    'Close',
+                                    style: GoogleFonts.inter(
+                                      color: primaryColor.withOpacity(0.8),
+                                      fontSize: context.responsiveText(16),
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 0.3,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            _spokenText,
-                            style: GoogleFonts.inter(
-                              color: primaryColor,
-                              fontSize: 14, // Reduced font size
-                              fontWeight: FontWeight.w500,
-                              height: 1.4, // Reduced line height
                             ),
-                            maxLines: 5, // Limit lines
-                            overflow: TextOverflow.ellipsis,
                           ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20), // Reduced spacing
-                  ],
 
-                  // Action Button
-                  Container(
-                    width: double.infinity,
-                    height: 50, // Reduced height
-                    decoration: BoxDecoration(
-                      color: primaryColor.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(12), // Reduced radius
-                      border: Border.all(
-                        color: primaryColor.withOpacity(0.15),
-                        width: 1,
-                      ),
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      borderRadius: BorderRadius.circular(12),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(12),
-                        onTap: () => Navigator.pop(context),
-                        child: Center(
-                          child: Text(
-                            'Close',
-                            style: GoogleFonts.inter(
-                              color: primaryColor.withOpacity(0.8),
-                              fontSize: 14, // Reduced font size
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
+                          SizedBox(height: context.responsiveHeight(20)),
+                        ],
                       ),
                     ),
                   ),
-
-                  const SizedBox(height: 16), // Added bottom spacing for safety
                 ],
               ),
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

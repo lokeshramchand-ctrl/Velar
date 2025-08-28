@@ -227,7 +227,7 @@ class _FinTrackHomePageState extends State<FinTrackHomePage>
         ),
       ),
       // Use bottomNavigationBar instead of floatingActionButton
-      bottomNavigationBar: CustomNavBar(
+      floatingActionButton: CustomNavBar(
         currentIndex: _selectedIndex,
         onTap: (index) {
           setState(() => _selectedIndex = index);
@@ -236,6 +236,7 @@ class _FinTrackHomePageState extends State<FinTrackHomePage>
         accentColor: accentColor,
         primaryColor: primaryColor,
         cardColor: cardColor,
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerTop,
       ),
     );
   }

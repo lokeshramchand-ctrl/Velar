@@ -9,14 +9,50 @@ import 'package:monarch/other_pages/colors.dart';
 import 'package:monarch/other_pages/enviroment.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ConfirmTransactionPage extends StatelessWidget {
+class ConfirmTransactionPage extends StatefulWidget {
   final Map<String, dynamic> data;
 
   const ConfirmTransactionPage({super.key, required this.data});
 
+  @override
+  State<ConfirmTransactionPage> createState() => _ConfirmTransactionPageState();
+}
+
+class _ConfirmTransactionPageState extends State<ConfirmTransactionPage>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<Offset> _slideAnimation;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.2),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+
+    _fadeAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
+
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   Future<void> _saveTransaction(BuildContext context) async {
-    const String saveUrl =
-        '${Environment.baseUrl}/api/transaction/add'; // ✅ make sure this matches backend
+    const String saveUrl = '${Environment.baseUrl}/api/transaction/add';
 
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -31,12 +67,10 @@ class ConfirmTransactionPage extends StatelessWidget {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'userId': userId,
-          'description': data['description'] ?? '',
-          'amount':
-              double.tryParse(data['amount'].toString()) ??
-              0.0, // ✅ force number
-          'category': data['category'] ?? 'Uncategorized',
-          'date': data['date'] ?? DateTime.now().toIso8601String(),
+          'description': widget.data['description'] ?? '',
+          'amount': double.tryParse(widget.data['amount'].toString()) ?? 0.0,
+          'category': widget.data['category'] ?? 'Uncategorized',
+          'date': widget.data['date'] ?? DateTime.now().toIso8601String(),
         }),
       );
 
@@ -47,11 +81,9 @@ class ConfirmTransactionPage extends StatelessWidget {
           icon: Icons.check_circle,
           backgroundColor: const Color(0xFF4CAF50),
           iconColor: Colors.white,
-          duration: const Duration(seconds: 3),
         );
         Navigator.popUntil(context, (route) => route.isFirst);
       } else {
-        // 👇 Log backend response
         throw Exception('Save failed: ${response.statusCode} ${response.body}');
       }
     } catch (e) {
@@ -61,7 +93,6 @@ class ConfirmTransactionPage extends StatelessWidget {
         icon: Icons.error_outline,
         backgroundColor: const Color(0xFFFF6B6B),
         iconColor: Colors.white,
-        duration: const Duration(seconds: 4),
       );
     }
   }
@@ -76,47 +107,29 @@ class ConfirmTransactionPage extends StatelessWidget {
   }) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Container(
-          padding: EdgeInsets.symmetric(vertical: context.responsiveHeight(4)),
-          child: Row(
-            children: [
-              Container(
-                padding: EdgeInsets.all(context.responsiveWidth(8)),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(
-                    context.responsiveWidth(8),
-                  ),
-                ),
-                child: Icon(
-                  icon,
-                  color: iconColor,
-                  size: context.responsiveText(20),
+        content: Row(
+          children: [
+            Icon(icon, color: iconColor, size: context.responsiveText(20)),
+            SizedBox(width: context.responsiveWidth(8)),
+            Expanded(
+              child: Text(
+                message,
+                style: GoogleFonts.inter(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                  fontSize: context.responsiveText(14),
                 ),
               ),
-              SizedBox(width: context.responsiveWidth(12)),
-              Expanded(
-                child: Text(
-                  message,
-                  style: GoogleFonts.inter(
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white,
-                    fontSize: context.responsiveText(14),
-                    height: 1.4,
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
         backgroundColor: backgroundColor,
         behavior: SnackBarBehavior.floating,
+        margin: EdgeInsets.all(context.responsiveWidth(12)),
+        duration: duration,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(context.responsiveWidth(12)),
         ),
-        margin: EdgeInsets.all(context.responsiveWidth(16)),
-        duration: duration,
-        elevation: 8,
       ),
     );
   }
@@ -130,15 +143,19 @@ class ConfirmTransactionPage extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: 40,
-          height: 40,
+          width: context.responsiveWidth(40),
+          height: context.responsiveWidth(40),
           decoration: BoxDecoration(
-            color: accentColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(10),
+            color: accentColor.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(context.responsiveWidth(10)),
           ),
-          child: Icon(icon, color: accentColor, size: 20),
+          child: Icon(
+            icon,
+            color: accentColor,
+            size: context.responsiveText(20),
+          ),
         ),
-        const SizedBox(width: 16),
+        SizedBox(width: context.responsiveWidth(14)),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -147,17 +164,16 @@ class ConfirmTransactionPage extends StatelessWidget {
                 label,
                 style: GoogleFonts.inter(
                   color: primaryColor.withOpacity(0.6),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.5,
+                  fontSize: context.responsiveText(12),
+                  fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: context.responsiveHeight(2)),
               Text(
                 value,
                 style: GoogleFonts.inter(
                   color: isAmount ? Colors.green : primaryColor,
-                  fontSize: 16,
+                  fontSize: context.responsiveText(16),
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -170,12 +186,12 @@ class ConfirmTransactionPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final amount = data['amount'];
-    final description = data['description'];
-    final category = data['category'];
+    final amount = widget.data['amount'];
+    final description = widget.data['description'];
+    final category = widget.data['category'];
     final date =
-        data['date'] != null
-            ? DateTime.parse(data['date']).toLocal()
+        widget.data['date'] != null
+            ? DateTime.parse(widget.data['date']).toLocal()
             : DateTime.now();
 
     return Scaffold(
@@ -184,11 +200,10 @@ class ConfirmTransactionPage extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: Container(
-          margin: const EdgeInsets.all(8),
+          margin: EdgeInsets.all(context.responsiveWidth(6)),
           decoration: BoxDecoration(
             color: cardColor,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: primaryColor.withOpacity(0.1), width: 1),
+            borderRadius: BorderRadius.circular(context.responsiveWidth(12)),
           ),
           child: IconButton(
             icon: Icon(Icons.arrow_back, color: primaryColor),
@@ -199,223 +214,206 @@ class ConfirmTransactionPage extends StatelessWidget {
           'Confirm Transaction',
           style: GoogleFonts.inter(
             color: primaryColor,
-            fontSize: 20,
+            fontSize: context.responsiveText(18),
             fontWeight: FontWeight.w700,
           ),
         ),
         centerTitle: true,
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header Card
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: cardColor,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: accentColor.withOpacity(0.05),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                  border: Border.all(
-                    color: accentColor.withOpacity(0.1),
-                    width: 1.5,
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: Colors.green.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: Colors.green.withOpacity(0.2),
-                              width: 1.5,
-                            ),
-                          ),
-                          child: const Icon(
-                            Icons.check_circle_outline,
-                            color: Colors.green,
-                            size: 24,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Review Transaction',
-                                style: GoogleFonts.inter(
-                                  color: primaryColor,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              Text(
-                                'Please confirm the details below',
-                                style: GoogleFonts.inter(
-                                  color: primaryColor.withOpacity(0.6),
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Transaction Details
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: backgroundColor,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: primaryColor.withOpacity(0.1),
-                    width: 1,
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    _buildDetailItem(
-                      icon: Icons.description_outlined,
-                      label: 'Description',
-                      value: description?.toString() ?? 'No description',
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    _buildDetailItem(
-                      icon: Icons.payments_outlined,
-                      label: 'Amount',
-                      value: '₹$amount',
-                      isAmount: true,
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    _buildDetailItem(
-                      icon: Icons.category_outlined,
-                      label: 'Category',
-                      value: category?.toString() ?? 'Uncategorized',
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    _buildDetailItem(
-                      icon: Icons.calendar_today_outlined,
-                      label: 'Date',
-                      value: '${date.day}/${date.month}/${date.year}',
-                    ),
-                  ],
-                ),
-              ),
-
-              const Spacer(),
-
-              // Action Buttons
-              Column(
+        child: SlideTransition(
+          position: _slideAnimation,
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: Padding(
+              padding: EdgeInsets.all(context.responsiveWidth(20)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Confirm Button
+                  // Header
                   Container(
-                    width: double.infinity,
-                    height: 56,
+                    padding: EdgeInsets.all(context.responsiveWidth(18)),
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Colors.green, Colors.green.shade600],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+                      color: cardColor,
+                      borderRadius: BorderRadius.circular(
+                        context.responsiveWidth(18),
                       ),
-                      borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.green.withOpacity(0.3),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
+                          color: accentColor.withOpacity(0.08),
+                          blurRadius: 18,
+                          offset: const Offset(0, 6),
                         ),
                       ],
                     ),
-                    child: Material(
-                      color: Colors.transparent,
-                      borderRadius: BorderRadius.circular(16),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(16),
-                        onTap: () => _saveTransaction(context),
-                        child: Center(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(
-                                Icons.check,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Confirm & Save Transaction',
-                                style: GoogleFonts.inter(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(context.responsiveWidth(10)),
+                          decoration: BoxDecoration(
+                            color: Colors.green.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(
+                              context.responsiveWidth(10),
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.check_circle_outline,
+                            color: Colors.green,
+                            size: context.responsiveText(22),
                           ),
                         ),
-                      ),
+                        SizedBox(width: context.responsiveWidth(14)),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Review Transaction",
+                              style: GoogleFonts.inter(
+                                fontSize: context.responsiveText(16),
+                                fontWeight: FontWeight.w700,
+                                color: primaryColor,
+                              ),
+                            ),
+                            Text(
+                              "Please confirm the details below",
+                              style: GoogleFonts.inter(
+                                fontSize: context.responsiveText(13),
+                                fontWeight: FontWeight.w500,
+                                color: primaryColor.withOpacity(0.6),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
 
-                  const SizedBox(height: 16),
+                  SizedBox(height: context.responsiveHeight(24)),
 
-                  // Cancel Button
+                  // Details Card
                   Container(
-                    width: double.infinity,
-                    height: 48,
+                    padding: EdgeInsets.all(context.responsiveWidth(20)),
                     decoration: BoxDecoration(
                       color: backgroundColor,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(
+                        context.responsiveWidth(18),
+                      ),
                       border: Border.all(
-                        color: primaryColor.withOpacity(0.2),
+                        color: primaryColor.withOpacity(0.08),
                         width: 1,
                       ),
                     ),
-                    child: TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: Text(
-                        'Edit or Cancel',
-                        style: GoogleFonts.inter(
-                          color: primaryColor.withOpacity(0.7),
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                    child: Column(
+                      children: [
+                        _buildDetailItem(
+                          icon: Icons.description_outlined,
+                          label: "Description",
+                          value: description?.toString() ?? "No description",
+                        ),
+                        SizedBox(height: context.responsiveHeight(16)),
+                        _buildDetailItem(
+                          icon: Icons.payments_outlined,
+                          label: "Amount",
+                          value: "₹$amount",
+                          isAmount: true,
+                        ),
+                        SizedBox(height: context.responsiveHeight(16)),
+                        _buildDetailItem(
+                          icon: Icons.category_outlined,
+                          label: "Category",
+                          value: category?.toString() ?? "Uncategorized",
+                        ),
+                        SizedBox(height: context.responsiveHeight(16)),
+                        _buildDetailItem(
+                          icon: Icons.calendar_today_outlined,
+                          label: "Date",
+                          value: "${date.day}/${date.month}/${date.year}",
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const Spacer(),
+
+                  // Buttons
+                  Column(
+                    children: [
+                      // Confirm
+                      GestureDetector(
+                        onTapDown: (_) => _controller.forward(),
+                        onTapUp: (_) => _saveTransaction(context),
+                        child: AnimatedScale(
+                          scale: 1,
+                          duration: const Duration(milliseconds: 150),
+                          child: Container(
+                            width: double.infinity,
+                            padding: EdgeInsets.symmetric(
+                              vertical: context.responsiveHeight(14),
+                            ),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Colors.green, Colors.green.shade700],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(
+                                context.responsiveWidth(14),
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.green.withOpacity(0.3),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Center(
+                              child: Text(
+                                "Confirm & Save Transaction",
+                                style: GoogleFonts.inter(
+                                  fontSize: context.responsiveText(15),
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+
+                      SizedBox(height: context.responsiveHeight(14)),
+
+                      // Cancel
+                      OutlinedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: Size(
+                            double.infinity,
+                            context.responsiveHeight(48),
+                          ),
+                          side: BorderSide(
+                            color: primaryColor.withOpacity(0.3),
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              context.responsiveWidth(12),
+                            ),
+                          ),
+                        ),
+                        child: Text(
+                          "Edit or Cancel",
+                          style: GoogleFonts.inter(
+                            fontSize: context.responsiveText(14),
+                            fontWeight: FontWeight.w600,
+                            color: primaryColor.withOpacity(0.8),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
         ),
       ),
