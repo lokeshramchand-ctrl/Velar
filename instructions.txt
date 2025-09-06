@@ -1,0 +1,9 @@
+
+
+Commit to Forgejo repo 
+
+git commit -u forgejo oho
+
+Commit to github repo 
+
+git commit -m origin oho

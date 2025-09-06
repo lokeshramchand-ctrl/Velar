@@ -1,6 +1,8 @@
 
 
 
+
+
 # 💰 Velar Finance App
 
 **Intelligent Personal Finance Management System**
