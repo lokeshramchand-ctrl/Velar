@@ -3,5 +3,6 @@
   "python.analysis.extraPaths": [
     "./AI/Rules/transaction_",
     "./AI/Rules/transaction_"
-  ]
+  ],
+  "dart.flutterSdkPath": "C:\\Developmenting\\Flutter\\flutter"
 }

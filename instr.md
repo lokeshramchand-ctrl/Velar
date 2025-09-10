@@ -1,9 +1,6 @@
-
-
-Commit to Forgejo repo 
-
+## Repo management
+### Forejo
 git commit -u forgejo oho
 
-Commit to github repo 
-
+### Github
 git commit -m origin oho

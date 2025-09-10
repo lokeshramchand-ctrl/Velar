@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:monarch/main_pages/Statistics/statistics.dart';
-import 'package:monarch/support/add.dart';
+import 'package:monarch/support/add_expense.dart';
 import 'package:monarch/other_pages/colors.dart';
 
 class QuickActionsPage extends StatelessWidget {
