@@ -44,7 +44,7 @@ const Transaction = mongoose.model('Transaction', transactionSchema);
 
 /* ---------- SESSION ---------- */
 const sessionOptions = {
-  secret: process.env.JWT_SECRET || 'change_this_secret',
+  secret: process.env.JWT_SECRET ,
   resave: false,
   saveUninitialized: false,
   cookie: {
