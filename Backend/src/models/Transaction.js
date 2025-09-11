@@ -12,7 +12,4 @@ const transactionSchema = new mongoose.Schema({
   referenceNumber: { type: String, unique: true, sparse: true },
 });
 
-// ✅ Check if the model already exists
-const Transaction = mongoose.models.Transaction || mongoose.model('Transaction', transactionSchema);
-
-module.exports = Transaction;
+module.exports = mongoose.model('Transaction', transactionSchema);
