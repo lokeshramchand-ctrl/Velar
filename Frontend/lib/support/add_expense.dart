@@ -243,7 +243,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
 
       // Send POST request including userId
       final response = await http.post(
-        Uri.parse('${Environment.baseUrl}/api/transaction/add'),
+        Uri.parse('${Environment.baseUrl}/api/transactions/add'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'description': descriptionController.text,
