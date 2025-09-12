@@ -93,7 +93,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
       return;
     }
 
-    // Remove any non-digit characters except decimal point
     String cleanValue = value.replaceAll(RegExp(r'[^\d.]'), '');
 
     // Ensure only one decimal point
@@ -172,7 +171,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
   }
 
   Future<void> addTransaction() async {
-    // Validation
     if (descriptionController.text.trim().isEmpty ||
         amountController.text.trim().isEmpty) {
       _showCustomSnackBar(
@@ -226,7 +224,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
     );
 
     try {
-      //  🔹 Get stored userId
       final prefs = await SharedPreferences.getInstance();
       final userId = prefs.getString('userId');
 
@@ -248,7 +245,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
         body: json.encode({
           'description': descriptionController.text,
           'amount': double.tryParse(amountController.text),
-          'userId': userId, // ✅ add user ID here
+          'userId': userId,
         }),
       );
 
