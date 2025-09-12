@@ -6,10 +6,13 @@ exports.addTransaction = async (req, res) => {
     const { description, amount, userId } = req.body;
     if (!userId) return res.status(400).json({ error: 'Missing userId' });
 
-    const predictRes = await axios.post('http://192.168.1.10:5000/api/predict', {
-      description,
-    });
-    const category = predictRes.data.category || 'Other';
+    // Predict category
+    let category = 'Other';
+    try {
+      category = await nlpService.predictCategory(description);
+    } catch (err) {
+      console.warn('NLP prediction failed, defaulting category to "Other"');
+    }
 
     const newTransaction = new Transaction({
       userId,
