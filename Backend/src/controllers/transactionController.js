@@ -23,7 +23,7 @@ exports.addTransaction = async (req, res) => {
     });
     await newTransaction.save();
 
-    res.status(200).json({ message: '✅ Transaction saved', data: newTransaction });
+    res.status(200).json({ message: ' Transaction saved', data: newTransaction });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
