@@ -12,7 +12,7 @@ const oauth2Client = new google.auth.OAuth2();
     const res = await gmail.users.messages.list({
       userId: 'me',
       q: `from:${bankEmail}`,
-      maxResults: 20, t
+      maxResults: 20, 
     });
 
     const messages = res.data.messages || [];
