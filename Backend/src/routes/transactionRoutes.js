@@ -57,11 +57,10 @@ router.post('/voice', async (req, res) => {
 
     await publishToQueue('voice-transactions', { voiceInput, userId });
 
-    res.status(200).json({ message: 'Voice transaction saved', data: newTransaction });
+    res.status(200).json({ message: 'Voice transaction queued for processing' });
   } catch (err) {
-    console.error('Voice transaction error:', err);
-    res.status(500).json({ error: 'Server error during voice transaction' });
+    console.error('Voice transaction queue error:', err);
+    res.status(500).json({ error: 'Failed to queue transaction' });
   }
 });
-
 module.exports = router;

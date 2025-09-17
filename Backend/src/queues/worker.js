@@ -85,17 +85,31 @@ async function startConsumers(channel) {
       try {
         category = await nlpService.predictCategory(parsed.vendor || 'Unknown');
       } catch { }
+// ✅ Safe date parsing
+let dateValue = new Date();
+if (parsed.date) {
+  // Try parsing dd-mm-yy (like 17-09-25)
+  const match = parsed.date.match(/^(\d{2})-(\d{2})-(\d{2})$/);
+  if (match) {
+    const [_, day, month, year] = match;
+    // Prefix 20 for yy → yyyy
+    const isoDate = `20${year}-${month}-${day}`;
+    const tempDate = new Date(isoDate);
+    if (!isNaN(tempDate.getTime())) {
+      dateValue = tempDate;
+    } else {
+      console.warn(`⚠️ Still invalid date after parse "${parsed.date}", defaulting to now`);
+    }
+  } else {
+    const tempDate = new Date(parsed.date);
+    if (!isNaN(tempDate.getTime())) {
+      dateValue = tempDate;
+    } else {
+      console.warn(`⚠️ Invalid parsed date "${parsed.date}", defaulting to now`);
+    }
+  }
+}
 
-      // ✅ Safe date parsing
-      let dateValue = new Date();
-      if (parsed.date) {
-        const tempDate = new Date(parsed.date);
-        if (!isNaN(tempDate.getTime())) {
-          dateValue = tempDate;
-        } else {
-          console.warn(`⚠️ Invalid parsed date "${parsed.date}", defaulting to now`);
-        }
-      }
 
       const txnData = {
         userId,

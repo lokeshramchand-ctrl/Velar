@@ -1,9 +1,8 @@
-// ignore_for_file: depend_on_referenced_packages, library_private_types_in_public_api, use_build_context_synchronously, deprecated_member_use
+// ignore_for_file: depend_on_referenced_packages, library_private_types_in_public_api, use_build_context_synchronously, deprecated_member_use, unused_local_variable
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
-import 'package:monarch/testing_pages/speech.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:monarch/other_pages/colors.dart';
@@ -192,12 +191,6 @@ class _VoiceTransactionDialogState extends State<VoiceTransactionDialog>
         final transactionData = responseData['data'];
 
         Navigator.pop(context);
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ConfirmTransactionPage(data: transactionData),
-          ),
-        );
       } else {
         throw Exception('Save failed with status: ${response.statusCode}');
       }
