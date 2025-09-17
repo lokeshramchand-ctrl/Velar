@@ -1,6 +1,5 @@
 // ignore_for_file: deprecated_member_use
 
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:monarch/support/add_expense.dart';
 import 'package:monarch/main_pages/HomePage/homepage.dart';
@@ -34,37 +33,15 @@ class CustomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 20),
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        height: 72,
-        width: MediaQuery.of(context).size.width * 0.7, // centered & responsive
-        decoration: BoxDecoration(
-          color: cardColor.withOpacity(0.65),
-          borderRadius: BorderRadius.circular(40),
-          boxShadow: [
-            BoxShadow(
-              color: primaryColor.withOpacity(0.15),
-              blurRadius: 30,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(40),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children:
-                  _navItems
-                      .map((item) => _buildNavItem(context, item))
-                      .toList(),
-            ),
-          ),
-        ),
+    return Container(
+      color: backgroundColor, // blend with page
+      height: 72,
+      width: double.infinity,
+      padding: EdgeInsets.fromLTRB(0, 0, 0, 34),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children:
+            _navItems.map((item) => _buildNavItem(context, item)).toList(),
       ),
     );
   }
@@ -82,26 +59,13 @@ class CustomNavBar extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 250),
-            width: isActive ? 38 : 30,
-            height: isActive ? 38 : 30,
-            decoration: BoxDecoration(
-              color:
-                  isActive
-                      ? primaryColor.withOpacity(0.15)
-                      : Colors.transparent,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Icon(
-              item.icon,
-              color: isActive ? primaryColor : primaryColor.withOpacity(0.4),
-              size: 24,
-            ),
+          Icon(
+            item.icon,
+            color: isActive ? primaryColor : primaryColor.withOpacity(0.4),
+            size: 28,
           ),
           const SizedBox(height: 4),
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 250),
+          Container(
             width: 6,
             height: 6,
             decoration: BoxDecoration(

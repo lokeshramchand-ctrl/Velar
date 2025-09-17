@@ -5,8 +5,7 @@ let connection;
 let channel;
 
 async function connectRabbit() {
-  if (channel) return channel; // reuse if channel is alive
-
+  if (channel) return channel;
   try {
     const uri = process.env.RABBITMQ_URI || 'amqp://localhost';
 

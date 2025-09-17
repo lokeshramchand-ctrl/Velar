@@ -1,10 +1,11 @@
-// worker.js
 require('dotenv').config();
 const mongoose = require('mongoose');
 const Transaction = require('../models/Transaction');
 const nlpService = require('../services/nlpService');
 const connectDB = require('../config/db');
 const { connectRabbit } = require('../config/rabbitmq');
+
+
 async function startConsumers(channel) {
   console.log('👂 Worker listening for queues...');
 
@@ -85,32 +86,30 @@ async function startConsumers(channel) {
       try {
         category = await nlpService.predictCategory(parsed.vendor || 'Unknown');
       } catch { }
-// ✅ Safe date parsing
-let dateValue = new Date();
-if (parsed.date) {
-  // Try parsing dd-mm-yy (like 17-09-25)
-  const match = parsed.date.match(/^(\d{2})-(\d{2})-(\d{2})$/);
-  if (match) {
-    const [_, day, month, year] = match;
-    // Prefix 20 for yy → yyyy
-    const isoDate = `20${year}-${month}-${day}`;
-    const tempDate = new Date(isoDate);
-    if (!isNaN(tempDate.getTime())) {
-      dateValue = tempDate;
-    } else {
-      console.warn(`⚠️ Still invalid date after parse "${parsed.date}", defaulting to now`);
-    }
-  } else {
-    const tempDate = new Date(parsed.date);
-    if (!isNaN(tempDate.getTime())) {
-      dateValue = tempDate;
-    } else {
-      console.warn(`⚠️ Invalid parsed date "${parsed.date}", defaulting to now`);
-    }
-  }
-}
-
-
+      // ✅ Safe date parsing
+      let dateValue = new Date();
+      if (parsed.date) {
+        // Try parsing dd-mm-yy (like 17-09-25)
+        const match = parsed.date.match(/^(\d{2})-(\d{2})-(\d{2})$/);
+        if (match) {
+          const [_, day, month, year] = match;
+          // Prefix 20 for yy → yyyy
+          const isoDate = `20${year}-${month}-${day}`;
+          const tempDate = new Date(isoDate);
+          if (!isNaN(tempDate.getTime())) {
+            dateValue = tempDate;
+          } else {
+            console.warn(`⚠️ Still invalid date after parse "${parsed.date}", defaulting to now`);
+          }
+        } else {
+          const tempDate = new Date(parsed.date);
+          if (!isNaN(tempDate.getTime())) {
+            dateValue = tempDate;
+          } else {
+            console.warn(`⚠️ Invalid parsed date "${parsed.date}", defaulting to now`);
+          }
+        }
+      }
       const txnData = {
         userId,
         description: parsed.vendor || 'Unknown Vendor',
@@ -144,7 +143,8 @@ if (parsed.date) {
   });
 }
 
-(async () => {
+(
+  async () => {
   try {
     await connectDB();
 

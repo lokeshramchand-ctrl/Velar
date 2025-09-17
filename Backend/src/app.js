@@ -5,17 +5,12 @@ require('dotenv').config();
 
 const authRoutes = require('./routes/authRoutes');
 const transactionRoutes = require('./routes/transactionRoutes');
-const syncRoutes = require('./routes/syncRoutes');
 const { connectRabbit } = require('./config/rabbitmq');
 const app = express();
 
-// Middleware
 app.use(express.json());
 app.use(cors({ origin: process.env.CORS_ORIGIN || '*', credentials: true }));
-
-
 app.use(passport.initialize());
-// Ensure RabbitMQ is connected on app startup
 (async () => {
   try {
     await connectRabbit();
@@ -25,9 +20,7 @@ app.use(passport.initialize());
   }
 })();
 
-// Routes
 app.use('/auth', authRoutes);
 app.use('/api/transactions', transactionRoutes);
-app.use('/api/sync-gmail', syncRoutes);
 
 module.exports = app;

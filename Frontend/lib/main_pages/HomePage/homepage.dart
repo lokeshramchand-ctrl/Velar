@@ -131,13 +131,13 @@ class _FinTrackHomePageState extends State<FinTrackHomePage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AnimatedSection(
-          delay: 600,
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 32),
-            child: const BalanceCardPage(),
-          ),
-        ),
+        // AnimatedSection(
+        //   delay: 600,
+        //   child: Container(
+        //     margin: const EdgeInsets.only(bottom: 32),
+        //     child: const BalanceCardPage(),
+        //   ),
+        // ),
         AnimatedSection(
           delay: 800,
           child: Container(
@@ -227,7 +227,7 @@ class _FinTrackHomePageState extends State<FinTrackHomePage>
         ),
       ),
       // Use bottomNavigationBar instead of floatingActionButton
-      floatingActionButton: CustomNavBar(
+      bottomNavigationBar: CustomNavBar(
         currentIndex: _selectedIndex,
         onTap: (index) {
           setState(() => _selectedIndex = index);

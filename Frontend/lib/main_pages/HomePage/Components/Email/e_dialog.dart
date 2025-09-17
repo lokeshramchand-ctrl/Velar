@@ -150,7 +150,7 @@ class _EmailTransactionDialogState extends State<EmailTransactionDialog>
       final accessToken = prefs.getString('accessToken');
 
       final response = await http.post(
-        Uri.parse("${Environment.baseUrl}/api/sync-gmail"),
+        Uri.parse("${Environment.baseUrl}/api/transactions/email"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"accessToken": accessToken, "userId": userId}),
       );
