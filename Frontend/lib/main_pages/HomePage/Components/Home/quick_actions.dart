@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:monarch/main_pages/Statistics/statistics.dart';
-import 'package:monarch/support/add_expense.dart';
+import 'package:monarch/main_pages/HomePage/Components/Manual/add_expense.dart';
 import 'package:monarch/other_pages/colors.dart';
 
 class QuickActionsPage extends StatelessWidget {
@@ -66,13 +66,11 @@ class QuickActionsPage extends StatelessWidget {
         const SizedBox(width: 16),
         Expanded(
           child: GestureDetector(
-onTap: () {
+            onTap: () {
               HapticFeedback.heavyImpact();
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const Statistics(),
-                ),
+                MaterialPageRoute(builder: (context) => const Statistics()),
               );
             },
             child: Container(

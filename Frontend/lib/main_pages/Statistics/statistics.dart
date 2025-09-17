@@ -8,7 +8,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:monarch/other_pages/colors.dart';
-import 'package:monarch/support/add_expense.dart';
+import 'package:monarch/main_pages/HomePage/Components/Manual/add_expense.dart';
 import 'package:monarch/other_pages/enviroment.dart';
 import 'package:monarch/main_pages/Statistics/Budget/update_budget.dart';
 import 'package:monarch/main_pages/Statistics/Budget/budget_manager.dart';
