@@ -1,11 +1,23 @@
 const express = require('express');
-const { addTransaction } = require('../controllers/transactionController');
 const Transaction = require('../models/Transaction');
-const nlpService = require('../services/nlpService');
+const { publishToQueue } = require('../config/rabbitmq'); 
 
 const router = express.Router();
 
-router.post('/add', addTransaction);
+router.post('/add', async (req, res) => {
+  try {
+    const { description, amount, userId } = req.body;
+    if (!userId) return res.status(400).json({ error: 'Missing userId' });
+    await publishToQueue('manual-transactions', { description, amount, userId });
+
+
+    res.status(200).json({ message: 'Transaction queued for processing' });
+  } catch (err) {
+    console.error('Manual transaction queue error:', err);
+    res.status(500).json({ error: 'Failed to queue transaction' });
+  }
+}
+);
 
 router.get('/', async (req, res) => {
   try {
@@ -43,36 +55,7 @@ router.post('/voice', async (req, res) => {
     if (!voiceInput) return res.status(400).json({ error: 'No voice input provided' });
     if (!userId) return res.status(400).json({ error: 'Missing userId' });
 
-    // Extract amount
-    const amountMatch = voiceInput.match(/(?:\₹|\$)?(\d+(?:\.\d{1,2})?)/);
-    const amount = amountMatch ? parseFloat(amountMatch[1]) : null;
-    if (amount === null) return res.status(400).json({ error: 'Could not extract amount' });
-
-    // Extract description
-    const cleaned = voiceInput
-      .toLowerCase()
-      .replace(/(bought|added|paid|spent|for|on)/g, '')
-      .replace(/₹?\d+/, '')
-      .trim();
-    const description = cleaned ? cleaned.charAt(0).toUpperCase() + cleaned.slice(1) : 'Misc';
-
-    // Predict category
-    let category = 'Other';
-    try {
-      category = await nlpService.predictCategory(description);
-    } catch (err) {
-      console.warn('NLP prediction failed, defaulting category to "Other"');
-    }
-
-    // Save transaction
-    const newTransaction = new Transaction({
-      userId,
-      description,
-      amount,
-      category,
-      source: 'voice',
-    });
-    await newTransaction.save();
+    await publishToQueue('voice-transactions', { voiceInput, userId });
 
     res.status(200).json({ message: 'Voice transaction saved', data: newTransaction });
   } catch (err) {

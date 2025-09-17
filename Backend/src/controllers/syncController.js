@@ -1,13 +1,11 @@
-const Transaction = require('../models/Transaction');
 const { bankRules } = require('../utils/bankRules');
 const { fetchBankEmails } = require('../services/gmailService');
 const { parseBankMessage } = require('../utils/parser');
-const nlpService = require('../services/nlpService');
+const { publishToQueue } = require('../config/rabbitmq'); 
 
 exports.syncGmail = async (req, res) => {
   try {
     const { accessToken, userId } = req.body;
-
     if (!accessToken) return res.status(400).json({ error: "Missing access token" });
     if (!userId) return res.status(400).json({ error: "Missing userId" });
 
@@ -17,103 +15,50 @@ exports.syncGmail = async (req, res) => {
     try {
       emails = await fetchBankEmails(accessToken, bankEmails);
     } catch (err) {
-      console.error('❌ Error fetching bank emails:', err);
-      return res.status(500).json({ error: 'Failed to fetch bank emails' });
+      console.error('❌ Gmail fetch error:', err);
+      return res.status(500).json({ error: 'Failed to fetch Gmail messages' });
     }
 
     if (!emails?.length) {
-      console.warn('⚠️ No bank emails found');
-      return res.json({ success: true, count: 0, transactions: [] });
+      return res.json({ success: true, count: 0, queued: 0 });
     }
 
-    const savedTxns = [];
+    let queued = 0;
     let skipped = 0;
 
     for (const email of emails) {
-      let parsed;
       try {
-        parsed = parseBankMessage(email.snippet);
-      } catch (err) {
-        console.error('❌ Parse error:', err.message, 'Snippet:', email.snippet);
-        skipped++;
-        continue;
-      }
+        const parsed = parseBankMessage(email.snippet);
 
-      if (!parsed.amount) {
-        console.warn('⚠️ Missing amount, skipping:', parsed);
-        skipped++;
-        continue;
-      }
-
-      // Category via NLP
-      let category = 'Other';
-      try {
-        category = await nlpService.predictCategory(parsed.vendor || "Unknown");
-      } catch (err) {
-        console.error('❌ NLP error:', err.message);
-      }
-
-      // Parse date
-      const parseDateString = (dateStr) => {
-        if (!dateStr) return null;
-        const parts = dateStr.split('-');
-        if (parts.length === 3) {
-          const [day, month, yearSuffix] = parts;
-          const year = 2000 + parseInt(yearSuffix, 10);
-          return new Date(year, parseInt(month, 10) - 1, parseInt(day, 10));
+        if (!parsed?.amount) {
+          console.warn('⚠️ Skipping email without amount:', email.snippet);
+          skipped++;
+          continue;
         }
-        return new Date(dateStr); // fallback
-      };
-      const dateValue = parseDateString(parsed.date) || new Date();
 
-      try {
-        if (parsed.referenceNumber) {
-          const updatedTxn = await Transaction.findOneAndUpdate(
-            { referenceNumber: parsed.referenceNumber },
-            {
-              userId,
-              description: parsed.vendor || "Unknown Vendor",
-              amount: parsed.amount,
-              type: parsed.type || "unknown",
-              date: dateValue,
-              vendor: parsed.vendor,
-              category,
-              source: "email",
-              bank: email.from,
-              referenceNumber: parsed.referenceNumber,
-            },
-            { upsert: true, new: true, setDefaultsOnInsert: true, runValidators: true }
-          );
-          savedTxns.push(updatedTxn);
-        } else {
-          const newTxn = new Transaction({
-            userId,
-            description: parsed.vendor || "Unknown Vendor",
-            amount: parsed.amount,
-            type: parsed.type || "unknown",
-            date: dateValue,
-            vendor: parsed.vendor,
-            category,
-            source: "email",
-            bank: email.from,
-          });
-          await newTxn.save();
-          savedTxns.push(newTxn);
-        }
+        // ✅ push to RabbitMQ using publishToQueue helper
+        await publishToQueue("email-transactions", {
+          userId,
+          parsed,
+          from: email.from
+        });
+
+        queued++;
       } catch (err) {
-        console.error('❌ DB save error:', err.message);
+        console.error('❌ Parse/Queue error:', err.message);
+        skipped++;
       }
     }
 
     return res.json({
       success: true,
-      count: savedTxns.length,
-      skipped,
-      transactions: savedTxns,
+      count: emails.length,
+      queued,
+      skipped
     });
 
   } catch (error) {
-    console.error('❌ Unexpected error in /api/sync-gmail:', error);
-    return res.status(500).json({ error: 'Failed to fetch and save Gmail messages' });
+    console.error('❌ Unexpected sync error:', error);
+    return res.status(500).json({ error: 'Unexpected sync error' });
   }
 };
