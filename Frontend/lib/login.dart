@@ -128,6 +128,7 @@ class _LoginScreenState extends State<LoginScreen>
 
       final String? idToken = auth.idToken;
       final String? accessToken = auth.accessToken;
+      final String? name = account.displayName;
 
       if (idToken == null || accessToken == null) {
         debugPrint("❌ Failed to get tokens");
@@ -147,6 +148,8 @@ class _LoginScreenState extends State<LoginScreen>
           final prefs = await SharedPreferences.getInstance();
           prefs.setString('userId', data['user']['_id']);
           prefs.setString('accessToken', accessToken);
+          // Save name & email locally
+          if (name != null) prefs.setString('name', name);
 
           Navigator.pushReplacement(
             context,

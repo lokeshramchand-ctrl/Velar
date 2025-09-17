@@ -2,15 +2,15 @@
 
 import 'package:flutter/material.dart';
 import 'package:monarch/main_pages/HomePage/Components/Email/e_dialog.dart';
-import 'package:monarch/main_pages/HomePage/Components/Home/hero_card.dart';
 import 'package:monarch/main_pages/HomePage/animated.dart';
 import 'package:monarch/main_pages/HomePage/Components/Home/greeting.dart';
 import 'package:monarch/main_pages/HomePage/Components/Home/navbar.dart';
 import 'package:monarch/main_pages/HomePage/Components/Voice/voice_dialog.dart';
 import 'package:monarch/other_pages/colors.dart';
+import 'package:monarch/support/add_expense.dart';
 import 'package:monarch/support/fetch_service.dart';
-import 'package:monarch/main_pages/HomePage/Components/Home/quick_actions.dart';
 import 'package:monarch/support/transcations_recent.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FinTrackHomePage extends StatefulWidget {
   const FinTrackHomePage({super.key});
@@ -54,19 +54,26 @@ class _FinTrackHomePageState extends State<FinTrackHomePage>
     });
   }
 
-  void _updateGreeting() {
+  Future<void> _updateGreeting() async {
     final now = DateTime.now();
     final hour = now.hour;
+    final prefs = await SharedPreferences.getInstance();
+    String? name = prefs.getString('name');
+    String firstName = (name ?? "User").split(' ').first;
 
+    String greeting;
     if (hour >= 5 && hour < 12) {
-      _greetingText = 'Good Morning';
+      greeting = 'Good Morning, $firstName';
     } else if (hour >= 12 && hour < 17) {
-      _greetingText = 'Good Afternoon';
+      greeting = 'Good Afternoon, $firstName';
     } else if (hour >= 17 && hour < 21) {
-      _greetingText = 'Good Evening';
+      greeting = 'Good Evening, $firstName';
     } else {
-      _greetingText = 'Good Night';
+      greeting = 'Good Night, $firstName';
     }
+    setState(() {
+      _greetingText = greeting;
+    });
   }
 
   void _setupAnimations() {
@@ -117,12 +124,19 @@ class _FinTrackHomePageState extends State<FinTrackHomePage>
         isScrollControlled: true,
         builder: (context) => VoiceTransactionDialog(),
       );
-    } else {
+    } else if (type == 'email') {
       showModalBottomSheet(
         context: context,
         backgroundColor: Colors.transparent,
         isScrollControlled: true,
         builder: (context) => EmailTransactionDialog(),
+      );
+    } else {
+      showModalBottomSheet(
+        context: context,
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        builder: (context) => AddExpenseScreen(),
       );
     }
   }
@@ -131,20 +145,6 @@ class _FinTrackHomePageState extends State<FinTrackHomePage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // AnimatedSection(
-        //   delay: 600,
-        //   child: Container(
-        //     margin: const EdgeInsets.only(bottom: 32),
-        //     child: const BalanceCardPage(),
-        //   ),
-        // ),
-        AnimatedSection(
-          delay: 800,
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 32),
-            child: QuickActionsPage(),
-          ),
-        ),
         AnimatedSection(
           delay: 1000,
           child: Container(
@@ -154,7 +154,6 @@ class _FinTrackHomePageState extends State<FinTrackHomePage>
             ),
           ),
         ),
-        const SizedBox(height: 120),
       ],
     );
   }
@@ -208,12 +207,16 @@ class _FinTrackHomePageState extends State<FinTrackHomePage>
                           children: [
                             GreetingHeader(
                               greetingText: _greetingText,
+
                               scaleAnimation: _scaleAnimation,
                               onEmailPressed:
                                   () => _showTransactionEntryDialog('email'),
                               onVoicePressed:
                                   () => _showTransactionEntryDialog('voice'),
+                              onManualPressed:
+                                  () => _showTransactionEntryDialog('manual'),
                             ),
+                            const SizedBox(height: 45),
                             _buildMainContent(),
                           ],
                         ),

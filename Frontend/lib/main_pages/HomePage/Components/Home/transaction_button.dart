@@ -5,12 +5,14 @@ import 'package:monarch/other_pages/colors.dart';
 
 class TransactionButtons extends StatelessWidget {
   final Animation<double> scaleAnimation;
+  final VoidCallback onManualPressed;
   final VoidCallback onEmailPressed;
   final VoidCallback onVoicePressed;
 
   const TransactionButtons({
     super.key,
     required this.scaleAnimation,
+    required this.onManualPressed,
     required this.onEmailPressed,
     required this.onVoicePressed,
   });
@@ -24,15 +26,12 @@ class TransactionButtons extends StatelessWidget {
           scale: scaleAnimation.value,
           child: Row(
             children: [
-              _buildButton(
-                icon: Icons.mail_outline,
-                onPressed: onEmailPressed,
-              ),
+              _buildButton(icon: Icons.add, onPressed: onManualPressed),
               const SizedBox(width: 12),
-              _buildButton(
-                icon: Icons.mic_outlined,
-                onPressed: onVoicePressed,
-              ),
+
+              _buildButton(icon: Icons.mail_outline, onPressed: onEmailPressed),
+              const SizedBox(width: 12),
+              _buildButton(icon: Icons.mic_outlined, onPressed: onVoicePressed),
             ],
           ),
         );
@@ -40,7 +39,10 @@ class TransactionButtons extends StatelessWidget {
     );
   }
 
-  Widget _buildButton({required IconData icon, required VoidCallback onPressed}) {
+  Widget _buildButton({
+    required IconData icon,
+    required VoidCallback onPressed,
+  }) {
     return Container(
       width: 56,
       height: 56,
@@ -60,10 +62,7 @@ class TransactionButtons extends StatelessWidget {
             offset: const Offset(0, 2),
           ),
         ],
-        border: Border.all(
-          color: accentColor.withOpacity(0.08),
-          width: 1.5,
-        ),
+        border: Border.all(color: accentColor.withOpacity(0.08), width: 1.5),
       ),
       child: Material(
         color: Colors.transparent,
@@ -72,14 +71,8 @@ class TransactionButtons extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           onTap: onPressed,
           child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Icon(
-              icon,
-              color: accentColor,
-              size: 28,
-            ),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
+            child: Icon(icon, color: accentColor, size: 28),
           ),
         ),
       ),
