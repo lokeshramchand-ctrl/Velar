@@ -121,7 +121,6 @@ async function startConsumers(channel) {
         savedTxn = new Transaction(txnData);
         await savedTxn.save();
       }
-
       console.log('✅ Saved email txn:', savedTxn._id);
       channel.ack(msg);
     } catch (err) {
@@ -131,7 +130,6 @@ async function startConsumers(channel) {
   });
 }
 
-// bootstrap worker
 (async () => {
   try {
     await connectDB();
