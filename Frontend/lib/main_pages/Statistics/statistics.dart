@@ -10,6 +10,8 @@ import 'package:http/http.dart' as http;
 import 'package:monarch/main_pages/Statistics/Widgets/buildTransactionCard.dart';
 import 'package:monarch/main_pages/Statistics/Widgets/category_breakdown.dart';
 import 'package:monarch/main_pages/Statistics/Widgets/category_row.dart';
+import 'package:monarch/main_pages/Statistics/Widgets/total_spent_card.dart';
+import 'package:monarch/other_pages/category_chips.dart';
 import 'package:monarch/other_pages/colors.dart';
 import 'package:monarch/main_pages/HomePage/Components/Manual/add_expense.dart';
 import 'package:monarch/other_pages/enviroment.dart';
@@ -156,170 +158,6 @@ class StatisticsState extends State<Statistics> with TickerProviderStateMixin {
   }
 
   var budget = 100000.0 > 0 ? 100000.0 : 0.0;
-  Widget _buildTotalSpentCard() {
-    final totalSpent = transactions.fold<double>(
-      0,
-      (sum, tx) => sum + tx.amount,
-    );
-    final progress = totalSpent / budget;
-
-    return SlideTransition(
-      position: _slideAnimation,
-      child: FadeTransition(
-        opacity: _fadeAnimation,
-        child: Container(
-          margin: EdgeInsets.symmetric(horizontal: context.responsiveWidth(24)),
-          padding: EdgeInsets.all(context.responsiveWidth(32)),
-          decoration: BoxDecoration(
-            color: cardColor,
-            borderRadius: BorderRadius.circular(context.responsiveWidth(28)),
-            boxShadow: [
-              BoxShadow(
-                color: primaryColor.withOpacity(0.06),
-                blurRadius: context.responsiveWidth(30),
-                offset: const Offset(0, 8),
-                spreadRadius: 0,
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'TOTAL SPENT',
-                style: GoogleFonts.inter(
-                  fontSize: context.responsiveText(13),
-                  fontWeight: FontWeight.w500,
-                  color: textSecondary,
-                  letterSpacing: 1.2,
-                ),
-              ),
-              SizedBox(height: context.responsiveHeight(12)),
-              Text(
-                '₹${totalSpent.toStringAsFixed(1)}',
-                style: GoogleFonts.inter(
-                  fontSize: context.responsiveText(42),
-                  fontWeight: FontWeight.w700,
-                  color: primaryColor,
-                  height: 1.1,
-                ),
-              ),
-              SizedBox(height: context.responsiveHeight(32)),
-              Center(
-                child: Container(
-                  width: context.responsiveWidth(160),
-                  height: context.responsiveWidth(160),
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Container(
-                        width: context.responsiveWidth(160),
-                        height: context.responsiveWidth(160),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: surfaceColor,
-                            width: context.responsiveWidth(8),
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        width: context.responsiveWidth(160),
-                        height: context.responsiveWidth(160),
-                        child: CircularProgressIndicator(
-                          value: progress > 1 ? 1 : progress,
-                          strokeWidth: context.responsiveWidth(8),
-                          backgroundColor: Colors.transparent,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            progress > 0.8
-                                ? const Color(0xFFE74C3C)
-                                : progress > 0.6
-                                ? const Color(0xFFF39C12)
-                                : accentColor,
-                          ),
-                          strokeCap: StrokeCap.round,
-                        ),
-                      ),
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            '${(progress * 100).toInt()}%',
-                            style: GoogleFonts.inter(
-                              fontSize: context.responsiveText(24),
-                              fontWeight: FontWeight.w700,
-                              color: primaryColor,
-                            ),
-                          ),
-                          SizedBox(height: context.responsiveHeight(4)),
-                          Text(
-                            'of ₹${budget.toInt()}',
-                            style: GoogleFonts.inter(
-                              fontSize: context.responsiveText(12),
-                              fontWeight: FontWeight.w500,
-                              color: textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: context.responsiveHeight(24)),
-              if (totalAmountPerCategory.isNotEmpty)
-                CategoryBreakdown(
-                  totalAmountPerCategory: totalAmountPerCategory,
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget buildCategoryChips() {
-    return Container(
-      height: context.responsiveHeight(50),
-      margin: EdgeInsets.only(bottom: context.responsiveHeight(16)),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.symmetric(horizontal: context.responsiveWidth(20)),
-        itemCount: categories.length,
-        itemBuilder: (context, index) {
-          final cat = categories[index];
-          final bool isSelected = cat == selectedCategory;
-          return Container(
-            margin: EdgeInsets.only(right: context.responsiveWidth(12)),
-            child: FilterChip(
-              label: Text(cat),
-              selected: isSelected,
-              onSelected: (selected) {
-                if (selected) {
-                  setState(() => selectedCategory = cat);
-                  fetchTransactions(category: cat);
-                }
-              },
-              backgroundColor: surfaceColor,
-              selectedColor: primaryColor,
-              checkmarkColor: cardColor,
-              labelStyle: GoogleFonts.inter(
-                color: isSelected ? cardColor : textSecondary,
-                fontWeight: FontWeight.w500,
-                fontSize: context.responsiveText(14),
-              ),
-              side: BorderSide.none,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(
-                  context.responsiveWidth(20),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
 
   int _selectedIndex = 0;
 
@@ -330,8 +168,21 @@ class StatisticsState extends State<Statistics> with TickerProviderStateMixin {
       body: Column(
         children: [
           // _buildHeader(),
-          _buildTotalSpentCard(),
-          buildCategoryChips(),
+          TotalSpentCard(
+            budget: budget,
+            transactions: transactions,
+            slideAnimation: _slideAnimation,
+            fadeAnimation: _fadeAnimation,
+            totalAmountPerCategory: totalAmountPerCategory,
+          ),
+          CategoryChips(
+            categories: categories,
+            selectedCategory: selectedCategory,
+            onCategorySelected: (cat) {
+              setState(() => selectedCategory = cat);
+              fetchTransactions(category: cat);
+            },
+          ),
           Expanded(
             child:
                 isLoading
