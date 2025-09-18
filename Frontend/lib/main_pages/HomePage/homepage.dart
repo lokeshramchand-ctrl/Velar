@@ -1,6 +1,8 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
+import 'package:monarch/main_pages/HomePage/Backend_Support/fetch_service.dart';
+import 'package:monarch/main_pages/HomePage/Backend_Support/transcations_recent.dart';
 import 'package:monarch/main_pages/HomePage/Components/Email/e_dialog.dart';
 import 'package:monarch/main_pages/HomePage/animated.dart';
 import 'package:monarch/main_pages/HomePage/Components/Home/greeting.dart';
@@ -8,8 +10,7 @@ import 'package:monarch/main_pages/HomePage/Components/Home/navbar.dart';
 import 'package:monarch/main_pages/HomePage/Components/Voice/voice_dialog.dart';
 import 'package:monarch/other_pages/colors.dart';
 import 'package:monarch/main_pages/HomePage/Components/Manual/add_expense.dart';
-import 'package:monarch/support/fetch_service.dart';
-import 'package:monarch/support/transcations_recent.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FinTrackHomePage extends StatefulWidget {
