@@ -3,8 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:monarch/main_pages/Statistics/statistics.dart';
+import 'package:monarch/main_pages/Statistics/Widgets/category/category_icons.dart';
 import 'package:monarch/other_pages/category_colors.dart';
-import 'package:monarch/other_pages/category_icons.dart';
 import 'package:monarch/other_pages/colors.dart';
 import '../../../other_pages/reponsive.dart';
 

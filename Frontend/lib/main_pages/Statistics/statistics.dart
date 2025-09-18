@@ -11,7 +11,7 @@ import 'package:monarch/main_pages/Statistics/Widgets/buildTransactionCard.dart'
 import 'package:monarch/main_pages/Statistics/Widgets/category_breakdown.dart';
 import 'package:monarch/main_pages/Statistics/Widgets/category_row.dart';
 import 'package:monarch/main_pages/Statistics/Widgets/total_spent_card.dart';
-import 'package:monarch/other_pages/category_chips.dart';
+import 'package:monarch/main_pages/Statistics/Widgets/category/category_chips.dart';
 import 'package:monarch/other_pages/colors.dart';
 import 'package:monarch/main_pages/HomePage/Components/Manual/add_expense.dart';
 import 'package:monarch/other_pages/enviroment.dart';

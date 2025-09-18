@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../other_pages/colors.dart';
-import '../other_pages/reponsive.dart';
+import '../../../../other_pages/colors.dart';
+import '../../../../other_pages/reponsive.dart';
 
 class CategoryChips extends StatelessWidget {
   final List<String> categories;
