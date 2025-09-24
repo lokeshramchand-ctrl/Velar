@@ -10,3 +10,8 @@ git commit -m origin oho
 
 nlpservice.js
 environment.dart
+
+
+## Docker Commands
+cd backend/src
+docker-compose up -d
