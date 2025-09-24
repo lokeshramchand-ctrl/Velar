@@ -8,7 +8,7 @@ services:
     build: .             # Build the backend image from Dockerfile
     container_name: my-backend   # Name of the backend container
     ports:
-      - "8081:8081"              # Host:Container port mapping
+      - "3000:3000"              # Host:Container port mapping
     env_file:
       - ./src/.env          # Load environment variables from .env
     depends_on:                  # Ensure these start before backend
