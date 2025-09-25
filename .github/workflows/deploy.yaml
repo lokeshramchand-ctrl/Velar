@@ -35,6 +35,7 @@ jobs:
           docker build -t lozure.azurecr.io/nlpservice:latest ./Backend/AI/
           docker push lozure.azurecr.io/nlpservice:latest
 
+          
       - name: Deploy with docker-compose
         run: |
           az webapp create \
