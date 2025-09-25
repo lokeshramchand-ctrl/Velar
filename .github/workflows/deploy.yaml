@@ -27,12 +27,12 @@ jobs:
       - name: Build & Push Backend
         run: |
         
-          docker build -t lozure.azurecr.io/backend:latest ./backend
+          docker build -t lozure.azurecr.io/backend:latest ./Backend
           docker push lozure.azurecr.io/backend:latest
 
       - name: Build & Push NLP Service
         run: |
-          docker build -t lozure.azurecr.io/nlpservice:latest ./backend/AI/
+          docker build -t lozure.azurecr.io/nlpservice:latest ./Backend/AI/
           docker push lozure.azurecr.io/nlpservice:latest
 
       - name: Deploy with docker-compose
