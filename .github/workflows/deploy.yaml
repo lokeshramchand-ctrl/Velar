@@ -24,7 +24,7 @@ jobs:
 
       - name: Build & Push Backend
         run: |
-          docker build -t lozure.azurecr.io/backend:latest ./backend
+          docker build -t lozure.azurecr.io/backend:latest .
           docker push lozure.azurecr.io/backend:latest
 
       - name: Build & Push NLP Service
