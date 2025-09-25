@@ -1,0 +1,42 @@
+name: Deploy to Azure
+
+on:
+  push:
+    branches:
+      - oho  # or oho if that's your branch
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Login to ACR
+        run: |
+          az acr login --name lozure
+
+      - name: Build & Push Backend
+        run: |
+          docker build -t lozure.azurecr.io/backend:latest ./backend
+          docker push lozure.azurecr.io/backend:latest
+
+      - name: Build & Push NLP Service
+        run: |
+          docker build -t lozure.azurecr.io/nlpservice:latest ./AI
+          docker push lozure.azurecr.io/nlpservice:latest
+
+      - name: Deploy with docker-compose
+        run: |
+          az webapp create \
+            --resource-group myRG \
+            --plan myPlan \
+            --name velar-backend \
+            --multicontainer-config-file docker-compose.yml \
+            --multicontainer-config-type COMPOSE
