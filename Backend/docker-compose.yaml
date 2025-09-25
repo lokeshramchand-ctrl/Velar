@@ -5,7 +5,7 @@ services:
     image: lozure.azurecr.io/backend:latest
     container_name: my-backend
     ports:
-      - "3000:3000"
+      - "80:3000"
     env_file:
       - ./src/.env
     depends_on:
