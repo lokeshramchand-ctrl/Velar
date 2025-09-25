@@ -21,9 +21,12 @@ jobs:
       - name: Login to ACR
         run: |
           az acr login --name lozure
+      - name: List repo files
+        run: ls -R
 
       - name: Build & Push Backend
         run: |
+        
           docker build -t lozure.azurecr.io/backend:latest ./backend
           docker push lozure.azurecr.io/backend:latest
 
