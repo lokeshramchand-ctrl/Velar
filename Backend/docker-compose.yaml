@@ -1,31 +1,90 @@
-version: "3.9"
+version: "3.9"  # Use the latest stable Compose file version
+
+
 
 services:
+
+  # ==============================
+
+  # Backend Service
+
+  # ==============================
+
   backend:
-    image: lozure.azurecr.io/backend:latest
-    container_name: my-backend
+
+    build: .             # Build the backend image from Dockerfile
+
+    container_name: my-backend   # Name of the backend container
+
     ports:
-      - "80:3000"
+
+
+      - "3000:3000"              # Host:Container port mapping
+
     env_file:
-      - ./src/.env
-    depends_on:
+
+      - ./src/.env          # Load environment variables from .env
+
+    depends_on:                  # Ensure these start before backend
+
       - nlpservice  
+
       - rabbitmq
-    restart: always
+
+    restart: always      # Auto-restart unless manually stopped
+
+
+
+
+
+  # ==============================
+
+  # RabbitMQ Service
+
+  # ==============================
 
   rabbitmq:
-    image: rabbitmq:3-management
+
+    image: rabbitmq:3-management # RabbitMQ with management dashboard
+
     container_name: rabbitmq
+
     restart: always
+
     ports:
-      - "5672:5672"
-      - "15672:15672"
+
+      - "5672:5672"              # RabbitMQ broker
+
+      - "15672:15672"            # RabbitMQ management UI
+
+
+
+  # ==============================
+
+  # AI Service
+
+  # ==============================
 
   nlpservice:
-    image: lozure.azurecr.io/nlpservice:latest
+
+    build: ./AI
+
     container_name: nlpservice
+
     ports:
-      - "5000:5000"
+
+    - "5000:5000" 
+
+
+
+
+
+# ==============================
+
+# Named Volumes (persistent storage)
+
+# ==============================
 
 volumes:
+
   mongo_data: {}
