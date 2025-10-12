@@ -1,3 +1,41 @@
+# version: "3.9"
+
+# services:
+#   backend:
+#     image: lozure.azurecr.io/backend:latest
+#     container_name: my-backend
+#     ports:
+#       - "80:3000"   # Expose on port 80 in Azure
+#     environment:
+#       HOST: ${HOST}
+#       CORS_ORIGIN: ${CORS_ORIGIN}
+#       RABBITMQ_URI: ${RABBITMQ_URI}
+#       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+#       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+#       GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI}
+#       MONGO_URI: ${MONGO_URI}
+#       PORT: ${PORT}
+#     depends_on:
+#       - nlpservice
+#       - rabbitmq
+#     restart: always
+
+#   rabbitmq:
+#     image: rabbitmq:3-management
+#     container_name: rabbitmq
+#     restart: always
+#     ports:
+#       - "5672:5672"
+#       - "15672:15672"
+
+#   nlpservice:
+#     image: lozure.azurecr.io/nlpservice:latest
+#     container_name: nlpservice
+#     ports:
+#       - "5000:5000"
+
+# volumes:
+#   mongo_data: {}
 version: "3.9"  # Use the latest stable Compose file version
 
 
