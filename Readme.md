@@ -1,41 +1,4 @@
 
-- **Status**: ✅ Completed  
-- **Duration**: Q3 2024  
-- **Team Size**: 1 (Solo Project)  
-
----
-
-## 📌 Table of Contents
-
-- [🎯 Problem Statement](#-problem-statement)
-- [💡 Solution Approach](#-solution-approach)
-- [🚀 Key Features](#-key-features)
-- [🏗️ System Architecture](#️-system-architecture)
-- [🤖 Machine Learning](#-machine-learning)
-- [🔧 Technical Implementation](#-technical-implementation)
-- [📊 Data Visualization](#-data-visualization)
-- [🛠️ Technology Stack](#️-technology-stack)
-- [🔍 Key Challenges & Solutions](#-key-challenges--solutions)
-- [📈 Performance Metrics](#-performance-metrics)
-- [🚀 Future Enhancements](#-future-enhancements)
-- [📚 Learning Outcomes](#-learning-outcomes)
-- [🎯 Project Impact](#-project-impact)
-- [📖 Documentation](#-documentation)
-- [🤝 Collaboration & Workflow](#-collaboration--workflow)
-- [📞 Contact](#-contact)
-
----
-
-## 🎯 Problem Statement
-
-Traditional finance apps are:
-
-- Burdened by **manual categorization**
-- Filled with **clunky interfaces**
-- Overcomplicated for basic tasks
-- Visually overwhelming with poor feedback
-
----
 
 ## 💡 Solution Approach
 
