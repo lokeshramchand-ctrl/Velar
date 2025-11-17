@@ -1,47 +1,4 @@
 
-### Components
-
-- **Flutter**: UI, animations, UX
-- **Node.js/Express**: API + business logic
-- **Flask**: ML model server
-- **MongoDB**: Flexible NoSQL DB
-
-
-## 📊 Data Visualization (Flutter)
-
-* 📌 **Progress Bars**: Category-wise breakdown
-* 📈 **Interactive Charts**: Weekly/monthly trends
-* 🔄 **Real-Time Updates**: Dynamic data refresh
-* 🖥️ **Responsive**: Mobile-first design
-
----
-
-## 🛠️ Technology Stack
-
-### Frontend
-
-* Flutter
-* Dart
-* `fl_chart`, Google Fonts
-
-### Backend
-
-* Node.js, Express
-* MongoDB, Mongoose
-* Axios
-
-### ML
-
-* Python, Flask
-* Scikit-learn (TF-IDF + Naive Bayes)
-* Joblib (Model Serialization)
-
-### Tools
-
-* Git, VS Code
-* Postman, MongoDB Compass
-
----
 
 ## 🔍 Key Challenges & Solutions
 
