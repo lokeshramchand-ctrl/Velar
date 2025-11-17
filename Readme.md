@@ -25,3 +25,33 @@ Without automated analysis, people can’t see where their money goes or how to 
 • Many apps feel overly complicated
 
 Too many steps, too many charts — not enough simplicity.
+
+
+Solution Velar Offers
+
+Velar makes personal finance management effortless by combining automation, intelligence, and simplicity:
+
+• Voice-powered expense tracking
+
+Users can speak their transactions, and Velar converts them into structured entries instantly.
+
+• NLP-based auto-categorization
+
+Velar extracts amounts, merchants, and categories from voice input, emails, or typed text — reducing manual work.
+
+• Smart insights and analytics
+
+Clean dashboards show spending patterns, category breakdowns, monthly summaries, and savings trends.
+
+• Seamless cross-device sync
+
+All data is synced securely across devices using a scalable backend.
+
+• Simple, modern, and intuitive UI
+
+Designed to minimize friction — fewer steps, fewer forms, and a smooth user experience.
+
+• Built for real-life usage
+
+Handles inconsistent bank messages, learns from user corrections, and adapts over time.
+
