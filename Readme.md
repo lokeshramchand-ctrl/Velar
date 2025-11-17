@@ -1,2 +1,2 @@
 
-![Profile Picture](./images/banner.png)
+![Profile Picture](Frontend/assets/banner.png)
