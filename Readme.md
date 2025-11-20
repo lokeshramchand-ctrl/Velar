@@ -16,8 +16,9 @@ Managing personal finances is harder than it should be. Most people stop trackin
 
 • Many apps feel overly complicated -- Too many steps, too many charts — not enough simplicity.
 
+---
 
-Solution Velar Offers
+Solution 
 
 Velar makes personal finance management effortless by combining automation, intelligence, and simplicity:
 
