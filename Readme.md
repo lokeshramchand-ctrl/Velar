@@ -37,9 +37,6 @@ Velar makes personal finance management effortless by combining automation, inte
 
 ## Features
 
-• Cross-platform finance tracking app built with Flutter, supporting responsive UI, smooth navigation, and offline sync.
-
-• Secure backend powered by Node.js and Express with MongoDB for efficient data storage, authentication, and transaction handling.
 
 • Real-time data synchronization and notification workflows implemented using RabbitMQ for instant updates across devices.
 
@@ -51,5 +48,4 @@ Velar makes personal finance management effortless by combining automation, inte
 
 • Robust authentication system using OAuth 2.0 for secure and reliable access control.
 
-• Containerized backend services with Docker and CI/CD pipelines deployed via Coolify for streamlined development workflows.
 
