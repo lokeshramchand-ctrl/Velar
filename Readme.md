@@ -230,12 +230,3 @@ Velar/
 
 ---
 
-## **Other Tools & Utilities**
-
-* **Git + GitHub** for version control
-* **VS Code** as primary development environment
-* **Postman / Thunder Client** for API testing
-* **Mermaid.js diagrams (optional)** in documentation
-* **Linter & Analyzer** configured via `analysis_options.yaml`
-
----
