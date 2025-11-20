@@ -2,7 +2,7 @@
 ![Profile Picture](Frontend/assets/banner.png)
 
 
-Problem 
+### Problem 
 
 Managing personal finances is harder than it should be. Most people stop tracking their expenses because:
 
@@ -18,7 +18,7 @@ Managing personal finances is harder than it should be. Most people stop trackin
 
 ---
 
-Solution 
+## Solution 
 
 Velar makes personal finance management effortless by combining automation, intelligence, and simplicity:
 
