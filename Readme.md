@@ -361,7 +361,7 @@ Producer → Queue → Worker
 
 ---
 
-##  ** Database Architecture (MongoDB)**
+##  **Database Architecture (MongoDB)**
 
 MongoDB stores:
 
@@ -381,7 +381,7 @@ Older transactions are moved into **archive collections** by a scheduled worker 
 
 ---
 
-##  **6. Deployment Architecture**
+##  **Deployment Architecture**
 
 Velar uses containerized deployment:
 
@@ -401,7 +401,7 @@ Velar uses containerized deployment:
 
 ---
 
-##  ** High-Level Architecture Diagram (ASCII)**
+##  **High-Level Architecture Diagram (ASCII)**
 
 ```txt
                    ┌───────────────────────────┐
@@ -432,7 +432,7 @@ Velar uses containerized deployment:
 
 ---
 
-##  ** Key Architectural Advantages**
+##  **Key Architectural Advantages**
 
 * **Modular** → AI, backend, queues, frontend all independent
 * **Scalable** → Workers can scale horizontally
