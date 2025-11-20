@@ -111,24 +111,136 @@ Velar/
 │   ├── package.json
 │   ├── package-lock.json
 │   └── predict.js
+|── Frontend/
 │
-├── Frontend/
-│   ├── android/
-│   ├── assets/
-│   ├── ios/
-│   ├── lib/
-│   ├── linux/
-│   ├── macos/
-│   ├── screenshots/
-│   ├── test/
-│   ├── web/
-│   ├── windows/
-│   ├── pubspec.yaml
-│   ├── pubspec.lock
-│   └── README.md
+├── android/
+│   ├── app/
+│   │   └── src/
+│   │       ├── debug/
+│   │       │   └── AndroidManifest.xml
+│   │       ├── main/
+│   │       │   ├── kotlin/
+│   │       │   │   └── com/example/monarch/MainActivity.kt
+│   │       │   ├── res/
+│   │       │   │   ├── drawable/launch_background.xml
+│   │       │   │   ├── drawable-v21/launch_background.xml
+│   │       │   │   ├── mipmap-hdpi/ic_launcher.png
+│   │       │   │   ├── mipmap-mdpi/ic_launcher.png
+│   │       │   │   ├── mipmap-xhdpi/ic_launcher.png
+│   │       │   │   ├── mipmap-xxhdpi/ic_launcher.png
+│   │       │   │   └── mipmap-xxxhdpi/ic_launcher.png
+│   │       │   └── AndroidManifest.xml
+│   │       └── profile/
+│   │           └── AndroidManifest.xml
+│   ├── build.gradle.kts
+│   ├── gradle.properties
+│   ├── settings.gradle.kts
+│   └── .gitignore
+│
+├── assets/
+│   ├── banner.png
+│   └── money.png
+│
+├── ios/
+│   ├── Flutter/
+│   │   ├── AppFrameworkInfo.plist
+│   │   ├── Debug.xcconfig
+│   │   └── Release.xcconfig
+│   ├── Runner/
+│   │   ├── Assets.xcassets/
+│   │   │   ├── AppIcon.appiconset/
+│   │   │   │   ├── Icon-App-20x20@1x.png
+│   │   │   │   ├── Icon-App-20x20@2x.png
+│   │   │   │   ├── Icon-App-20x20@3x.png
+│   │   │   │   ├── Icon-App-29x29@1x.png
+│   │   │   │   ├── Icon-App-29x29@2x.png
+│   │   │   │   ├── Icon-App-29x29@3x.png
+│   │   │   │   ├── Icon-App-40x40@1x.png
+│   │   │   │   ├── Icon-App-40x40@2x.png
+│   │   │   │   ├── Icon-App-40x40@3x.png
+│   │   │   │   ├── Icon-App-60x60@2x.png
+│   │   │   │   ├── Icon-App-60x60@3x.png
+│   │   │   │   ├── Icon-App-76x76@1x.png
+│   │   │   │   ├── Icon-App-76x76@2x.png
+│   │   │   │   ├── Icon-App-83.5x83.5@2x.png
+│   │   ├── Base.lproj/
+│   │   │   ├── LaunchScreen.storyboard
+│   │   │   └── Main.storyboard
+│   │   ├── AppDelegate.swift
+│   │   ├── Info.plist
+│   │   └── Runner-Bridging-Header.h
+│   ├── Runner.xcodeproj
+│   ├── Runner.xcworkspace
+│   └── Podfile
+│
+├── lib/
+│   ├── main_pages/
+│   │   ├── HomePage/
+│   │   │   ├── Backend_Support/
+│   │   │   │   ├── fetch_service.dart
+│   │   │   │   └── transcations_recent.dart
+│   │   │   ├── Components/
+│   │   │   │   ├── Email/e_dialog.dart
+│   │   │   │   ├── Home/
+│   │   │   │   │   ├── greeting.dart
+│   │   │   │   │   ├── hero_card.dart
+│   │   │   │   │   ├── navbar.dart
+│   │   │   │   │   ├── quick_actions.dart
+│   │   │   │   │   └── transaction_button.dart
+│   │   │   │   ├── Manual/add_expense.dart
+│   │   │   │   └── Voice/
+│   │   │   │       ├── confirm.dart
+│   │   │   │       └── voice_dialog.dart
+│   │   │   ├── animated.dart
+│   │   │   └── homepage.dart
+│   │   ├── Statistics/
+│   │   │   ├── Budget/
+│   │   │   │   ├── budget_manager.dart
+│   │   │   │   └── update_budget.dart
+│   │   │   ├── Widgets/
+│   │   │   │   ├── category/
+│   │   │   │   │   ├── category_chips.dart
+│   │   │   │   │   ├── category_colors.dart
+│   │   │   │   │   └── category_icons.dart
+│   │   │   │   ├── buildTransactionCard.dart
+│   │   │   │   ├── category_breakdown.dart
+│   │   │   │   ├── category_row.dart
+│   │   │   │   ├── Custom_Snackbar.dart
+│   │   │   │   └── total_spent_card.dart
+│   │   │   └── statistics.dart
+│   │   ├── other_pages/
+│   │   │   ├── colors.dart
+│   │   │   ├── enviroment.dart
+│   │   │   └── reponsive.dart
+│   │   └── testing_pages/
+│   │       ├── emai_screen.dart
+│   │       ├── email.dart
+│   │       └── speech.dart
+│   ├── login.dart
+│   └── main.dart
+│
+├── linux/
+│   ├── flutter/
+│   ├── runner/
+│   └── CMakeLists.txt
+│
+├── macos/
+│   ├── Flutter/
+│   ├── Runner/
+│   ├── Runner.xcodeproj
+│   ├── Runner.xcworkspace
+│   └── RunnerTests/
+│
+├── screenshots/
+├── test/
+├── web/
+├── windows/
+│
+├── pubspec.yaml
+├── pubspec.lock
+└── README.md
 │
 ├── instructions.md
-└── README.md
 ```
 
 
