@@ -293,7 +293,7 @@ Backend/
 
 ---
 
-## ** AI / NLP Microservice (Python)**
+## **AI / NLP Microservice (Python)**
 
 The AI layer encapsulates intelligent features:
 
