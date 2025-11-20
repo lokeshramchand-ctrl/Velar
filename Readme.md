@@ -49,7 +49,7 @@ Velar makes personal finance management effortless by combining automation, inte
 • Robust authentication system using OAuth 2.0 for secure and reliable access control.
 
 
-## Folder Structure
+# **Folder Structure**
 ```txt
 Velar/
 │
