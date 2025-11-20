@@ -2,7 +2,7 @@
 ![Profile Picture](Frontend/assets/banner.png)
 
 
-## Problem 
+# **Problem**
 
 Managing personal finances is harder than it should be. Most people stop tracking their expenses because:
 
@@ -18,7 +18,7 @@ Managing personal finances is harder than it should be. Most people stop trackin
 
 
 
-## Solution 
+# **Solution**
 
 Velar makes personal finance management effortless by combining automation, intelligence, and simplicity:
 
@@ -35,7 +35,7 @@ Velar makes personal finance management effortless by combining automation, inte
 • Built for real-life usage -- Handles inconsistent bank messages, learns from user corrections, and adapts over time.
 
 
-## Features
+# **Features**
 
 
 • Real-time data synchronization and notification workflows implemented using RabbitMQ for instant updates across devices.
@@ -175,3 +175,67 @@ Velar/
 ```
 
 
+
+# **Tech Stack**
+
+## **Frontend (Flutter)**
+
+* **Flutter (Dart)** for cross-platform mobile development
+* **Material Design & Custom UI Components** for a modern, responsive interface
+* **State Management** using Provider / setState (based on your code structure)
+* **Speech-to-Text APIs** for voice-based transaction input
+* **Charts & Data Visualization Widgets** for financial insights
+* **Offline-first architecture** with local caching
+* **Platform Integrations**
+
+  * Android (Kotlin bridge)
+  * iOS (Swift & Storyboards)
+  * Web, macOS, Windows, Linux builds
+
+---
+
+## **Backend (Node.js + Express)**
+
+* **Node.js + Express.js** as the primary backend framework
+* **RESTful API Architecture** for clean and scalable communication
+* **MongoDB (Mongoose ORM)** for transaction, user, and archive storage
+* **RabbitMQ** for background workers, real-time sync, and event-driven workflows
+* **JWT Authentication** for secure user access
+* **Email Parsing Service** using Gmail API + rule-based extraction
+* **NLP Pipeline** (custom ML + rules) for intelligent categorization
+* **Modular Microservice-ready Structure** with workers, queues, controllers, services
+
+---
+
+## **AI & NLP**
+
+* Custom ML model trained with **Scikit-learn**
+* Vectorization using **TF-IDF**
+* Category prediction using **regex rules + ML hybrid approach**
+* Model served via **Python FastAPI** (`predict_api.py`)
+* Pickled models:
+
+  * `category_model.pkl`
+  * `vectorizer.pkl`
+
+---
+
+## **DevOps, Deployment & Tooling**
+
+* **Docker** for containerized services (backend + ML API)
+* **Coolify** for deployment & environment management
+* **CI/CD Pipeline** using GitHub Actions
+* **Docker Compose** for local service orchestration
+* **Environment-based config system** (dev + prod ready)
+
+---
+
+## **Other Tools & Utilities**
+
+* **Git + GitHub** for version control
+* **VS Code** as primary development environment
+* **Postman / Thunder Client** for API testing
+* **Mermaid.js diagrams (optional)** in documentation
+* **Linter & Analyzer** configured via `analysis_options.yaml`
+
+---
