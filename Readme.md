@@ -229,4 +229,217 @@ Velar/
 * **Environment-based config system** (dev + prod ready)
 
 ---
+Below is a **fully written, complete, professional Architecture section** for your Velar project.
+This is the kind of architecture description used in **case studies, GitHub READMEs, and technical interviews**.
+
+It includes:
+
+✅ High-level architecture
+✅ System components
+✅ Data flow
+✅ NLP pipeline
+✅ Sync workflow
+✅ Deployment model
+✅ Clear separation of frontend, backend, AI, and infra
+
+---
+
+
+## ** Frontend Architecture (Flutter)**
+
+The Flutter app acts as the client-side interface for:
+
+* Voice-based expense input
+* Manual input
+* Insights dashboard
+* Email-based transaction fetch
+* Real-time updates
+* Account management
+
+### **Key components**
+
+* `main_pages/HomePage/` – UI for expense display, quick actions, recent transactions
+* `Statistics/` – dashboard, budget manager, category breakdown
+* `Voice/` – voice dialog → STT → backend NLP pipeline
+* `Backend_Support/` – API integration + transaction fetch
+* `other_pages/` – environment settings, responsive helpers
+* Offline-first architecture (local caching before sync)
+
+Flutter compiles the same codebase to **Android**, **iOS**, **Web**, **Windows**, **Linux**, and **macOS**.
+
+---
+
+##  **Backend Architecture (Node.js + Express)**
+
+The backend acts as the **core API layer** responsible for:
+
+* User authentication
+* Transaction CRUD
+* Category management
+* Sync system
+* Email ingestion
+* Delegating NLP jobs to the AI service
+
+### **Backend Structure**
+
+```
+Backend/
+├── src/
+│   ├── config/        → DB + RabbitMQ setup  
+│   ├── controllers/   → Request handlers  
+│   ├── routes/        → API routes  
+│   ├── models/        → Mongoose schemas  
+│   ├── services/      → NLP, Gmail, business logic  
+│   ├── queues/        → Producers & Workers  
+│   ├── database/      → Archival jobs  
+│   └── utils/         → Parsers, rule engines  
+```
+
+### **Responsibilities**
+
+* REST API for mobile clients
+* Fetch bank emails → send to NLP service
+* Queue-based background processing
+* Manage user accounts
+* Build transaction insights
+* Maintain archive for old transactions
+
+---
+
+## ** AI / NLP Microservice (Python)**
+
+The AI layer encapsulates intelligent features:
+
+### **Components**
+
+```
+Backend/AI/
+├── model/
+│   ├── category_model.pkl
+│   └── vectorizer.pkl
+├── Rules/transaction_rules.py
+├── train/training.ipynb
+├── predict_api.py (FastAPI service)
+```
+
+### **Pipeline**
+
+1. **Input**: text (voice transcript, email text, or manual entry)
+2. **Regex Pre-processing**: extract amount, merchant, date
+3. **TF-IDF Vectorization**
+4. **ML Model Classification** → predicts category
+5. **Rule Engine Override** (if certain patterns match)
+6. **Response back to Node.js API**
+
+This approach gives Velar a **hybrid ML + Rules NLP engine**, making it both accurate and predictable.
+
+---
+
+## **Event-Driven Sync System (RabbitMQ)**
+
+RabbitMQ handles asynchronous and real-time processing.
+
+### **Used For**
+
+* Email ingestion
+* NLP inference jobs
+* Transaction archiving
+* Background sync
+* Push updates back to client
+
+### **Architecture**
+
+```
+Producer → Queue → Worker
+```
+
+### **Why RabbitMQ?**
+
+* Decouples heavy workloads from API
+* Enables retries and reliability
+* Makes sync feel instant for the user
+
+---
+
+##  ** Database Architecture (MongoDB)**
+
+MongoDB stores:
+
+### **Collections**
+
+* `User`
+* `Transaction`
+* `ArchivedTransaction`
+
+### **Advantages**
+
+* Schema flexibility
+* Great for JSON-like financial records
+* Fast for querying date ranges & categories
+
+Older transactions are moved into **archive collections** by a scheduled worker job.
+
+---
+
+##  **6. Deployment Architecture**
+
+Velar uses containerized deployment:
+
+### **Technologies**
+
+* **Docker** for backend, AI service, workers
+* **Docker Compose** for local orchestration
+* **Coolify** for hosting backend microservices
+* **GitHub Actions** for CI/CD
+
+### **Pipeline**
+
+1. Push to GitHub
+2. CI builds Docker images
+3. Coolify deploys containers
+4. Service restarts with zero downtime
+
+---
+
+##  ** High-Level Architecture Diagram (ASCII)**
+
+```txt
+                   ┌───────────────────────────┐
+                   │       Flutter App         │
+                   │  (Android / iOS / Web)    │
+                   └─────────────┬─────────────┘
+                                 │ REST API
+                                 ▼
+                  ┌─────────────────────────────┐
+                  │     Node.js Backend API     │
+                  │ Auth | Transactions | Sync  │
+                  └───────┬─────────────┬───────┘
+                          │             │
+                NLP Req   │             │  Queue Jobs
+                          ▼             ▼
+             ┌─────────────────┐   ┌─────────────────┐
+             │  Python NLP     │   │   RabbitMQ      │
+             │  (FastAPI ML)   │   │Producers/Worker │
+             └───────┬─────────┘   └────────┬────────┘
+                     │                      │
+                     └──────────┬───────────┘
+                                ▼
+                     ┌──────────────────────┐
+                     │      MongoDB         │
+                     │ Users | Txn | Archive│
+                     └──────────────────────┘
+```
+
+---
+
+##  ** Key Architectural Advantages**
+
+* **Modular** → AI, backend, queues, frontend all independent
+* **Scalable** → Workers can scale horizontally
+* **Reliable** → Queue-based job processing prevents failures
+* **Smart** → Hybrid ML + rules gives accuracy in categorization
+* **Multi-platform** → Single Flutter codebase for multiple devices
+* **Secure** → JWT auth, Docker isolation, controlled API access
+
+---
 
