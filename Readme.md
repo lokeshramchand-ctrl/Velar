@@ -229,23 +229,10 @@ Velar/
 * **Environment-based config system** (dev + prod ready)
 
 ---
-Below is a **fully written, complete, professional Architecture section** for your Velar project.
-This is the kind of architecture description used in **case studies, GitHub READMEs, and technical interviews**.
-
-It includes:
-
-✅ High-level architecture
-✅ System components
-✅ Data flow
-✅ NLP pipeline
-✅ Sync workflow
-✅ Deployment model
-✅ Clear separation of frontend, backend, AI, and infra
-
----
 
 
-## ** Frontend Architecture (Flutter)**
+
+## **Frontend Architecture (Flutter)**
 
 The Flutter app acts as the client-side interface for:
 
