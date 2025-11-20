@@ -2,7 +2,7 @@
 ![Profile Picture](Frontend/assets/banner.png)
 
 
-### Problem 
+## Problem 
 
 Managing personal finances is harder than it should be. Most people stop tracking their expenses because:
 
@@ -16,7 +16,7 @@ Managing personal finances is harder than it should be. Most people stop trackin
 
 • Many apps feel overly complicated -- Too many steps, too many charts — not enough simplicity.
 
----
+
 
 ## Solution 
 
