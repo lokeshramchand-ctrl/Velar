@@ -49,3 +49,86 @@ Velar makes personal finance management effortless by combining automation, inte
 • Robust authentication system using OAuth 2.0 for secure and reliable access control.
 
 
+## Folder Structure
+```txt
+Velar/
+│
+├── .github/
+│   └── workflows/
+│       └── deploy.yaml
+│
+├── .vscode/
+│   └── settings.json
+│
+├── Backend/
+│   ├── AI/
+│   │   ├── model/
+│   │   │   ├── category_model.pkl
+│   │   │   └── vectorizer.pkl
+│   │   ├── Rules/
+│   │   │   ├── __pycache__/
+│   │   │   │   └── transaction_rules.cpython-313.pyc
+│   │   │   └── transaction_rules.py
+│   │   ├── train/
+│   │   │   └── training.ipynb
+│   │   ├── Dockerfile
+│   │   ├── predict_api.py
+│   │   └── requirements.txt
+│   │
+│   ├── src/
+│   │   ├── config/
+│   │   │   ├── db.js
+│   │   │   └── rabbitmq.js
+│   │   ├── controllers/
+│   │   │   ├── authController.js
+│   │   │   └── transactionController.js
+│   │   ├── database/
+│   │   │   ├── archiveJob.js
+│   │   │   └── archiveService.js
+│   │   ├── models/
+│   │   │   ├── ArchivedTransaction.js
+│   │   │   ├── Transaction.js
+│   │   │   └── User.js
+│   │   ├── queues/
+│   │   │   ├── producer.js
+│   │   │   └── worker.js
+│   │   ├── routes/
+│   │   │   ├── authRoutes.js
+│   │   │   ├── syncRoutes.js
+│   │   │   └── transactionRoutes.js
+│   │   ├── services/
+│   │   │   ├── gmailService.js
+│   │   │   └── nlpService.js
+│   │   ├── utils/
+│   │   │   ├── bankRules.js
+│   │   │   └── parser.js
+│   │   ├── app.js
+│   │   └── server.js
+│   │
+│   ├── docker-compose.yaml
+│   ├── Dockerfile
+│   ├── index.js
+│   ├── package.json
+│   ├── package-lock.json
+│   └── predict.js
+│
+├── Frontend/
+│   ├── android/
+│   ├── assets/
+│   ├── ios/
+│   ├── lib/
+│   ├── linux/
+│   ├── macos/
+│   ├── screenshots/
+│   ├── test/
+│   ├── web/
+│   ├── windows/
+│   ├── pubspec.yaml
+│   ├── pubspec.lock
+│   └── README.md
+│
+├── instructions.md
+└── README.md
+```
+
+
