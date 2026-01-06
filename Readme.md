@@ -428,5 +428,5 @@ Velar uses containerized deployment:
 * **Multi-platform** → Single Flutter codebase for multiple devices
 * **Secure** → JWT auth, Docker isolation, controlled API access
 
----
+
 
