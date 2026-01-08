@@ -49,7 +49,7 @@ Velar makes personal finance management effortless by combining automation, inte
 • Robust authentication system using OAuth 2.0 for secure and reliable access control.
 
 
-### **Images**
+# **Images**
 
 <p align="center">
  <img src="./Frontend/screenshots/homepage.png" width="200" /> 
