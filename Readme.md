@@ -429,4 +429,15 @@ Velar uses containerized deployment:
 * **Secure** → JWT auth, Docker isolation, controlled API access
 
 
+### *Images* 
+
+<p align="center">
+ <img src="./Frontend/screenshots/homepage.jpg" width="200" /> 
+ <img src="./Frontend/screenshots/email.jpg" width="200" /> 
+ <img src="./Frontend/screenshots/voice.jpg" width="200" />
+ <img src="./Frontend/screenshots/transaction_1.jpg" width="200" /> 
+ <img src="./Frontend/screenshots/transaction.jpg" width="200" /> 
+ <img src="./Frontend/screenshots/add_expense.jpg" width="200" /> 
+</p>
+
 
