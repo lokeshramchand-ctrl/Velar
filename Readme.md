@@ -432,11 +432,11 @@ Velar uses containerized deployment:
 ### *Images* 
 
 <p align="center">
- <img src="./Frontend/screenshots/homepage.jpg" width="200" /> 
- <img src="./Frontend/screenshots/email.jpg" width="200" /> 
- <img src="./Frontend/screenshots/voice.jpg" width="200" />
+ <img src="./Frontend/screenshots/homepage.png" width="200" /> 
+ <img src="./Frontend/screenshots/email.png" width="200" /> 
+ <img src="./Frontend/screenshots/voice.png" width="200" />
  <img src="./Frontend/screenshots/transaction_1.jpg" width="200" /> 
- <img src="./Frontend/screenshots/transaction.jpg" width="200" /> 
+ <img src="./Frontend/screenshots/transaction.png" width="200" /> 
  <img src="./Frontend/screenshots/add_expense.jpg" width="200" /> 
 </p>
 
