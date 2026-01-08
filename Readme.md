@@ -49,6 +49,17 @@ Velar makes personal finance management effortless by combining automation, inte
 • Robust authentication system using OAuth 2.0 for secure and reliable access control.
 
 
+### **Images**
+
+<p align="center">
+ <img src="./Frontend/screenshots/homepage.png" width="200" /> 
+ <img src="./Frontend/screenshots/email.png" width="200" /> 
+ <img src="./Frontend/screenshots/voice.png" width="200" />
+ <img src="./Frontend/screenshots/transaction_1.jpg" width="200" /> 
+ <img src="./Frontend/screenshots/transaction.png" width="200" /> 
+ <img src="./Frontend/screenshots/add_expense.jpg" width="200" /> 
+</p>
+
 # **Folder Structure**
 ```txt
 Velar/
@@ -429,15 +440,6 @@ Velar uses containerized deployment:
 * **Secure** → JWT auth, Docker isolation, controlled API access
 
 
-### *Images* 
 
-<p align="center">
- <img src="./Frontend/screenshots/homepage.png" width="200" /> 
- <img src="./Frontend/screenshots/email.png" width="200" /> 
- <img src="./Frontend/screenshots/voice.png" width="200" />
- <img src="./Frontend/screenshots/transaction_1.jpg" width="200" /> 
- <img src="./Frontend/screenshots/transaction.png" width="200" /> 
- <img src="./Frontend/screenshots/add_expense.jpg" width="200" /> 
-</p>
 
 
