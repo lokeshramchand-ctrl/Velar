@@ -1,61 +1,70 @@
-# from flask import Flask, request, jsonify
-# import joblib  
-# import sklearn  
-# import numpy as np
-# from Rules.transaction_rules import get_category_from_rules
-
-# model = joblib.load("model/category_model.pkl")
-# vectorizer = joblib.load("model/vectorizer.pkl")  
-
-# app = Flask(__name__)
-
-# @app.route("/api/predict", methods=["POST"])
-# def predict():
-#     data = request.json
-#     description = data.get("description", "")
-
-#     if not description:
-#         return jsonify({"error": "Description is required"}), 400
-      
-#     category = get_category_from_rules(description)
-#     if not category:
-#       X = vectorizer.transform([description])
-#       prediction = model.predict(X)[0]
-
-#     return jsonify({"category": prediction})
-
-# if __name__ == "__main__":
-#     app.run(host="0.0.0.0", port=5000)
 from flask import Flask, request, jsonify
 import joblib
-import sklearn
 import numpy as np
+import re
+
 from Rules.transaction_rules import get_category_from_rules
 
+# Load models
 model = joblib.load("model/category_model.pkl")
 vectorizer = joblib.load("model/vectorizer.pkl")
 
 app = Flask(__name__)
 
+# ---------- EXTRACTION FUNCTIONS ----------
+
+def extract_amount(text):
+    match = re.search(r'(\d+(?:\.\d{1,2})?)', text.replace(',', ''))
+    return float(match.group(1)) if match else None
+
+
+def extract_merchant(text):
+    # simple heuristic baseline
+    words = text.lower().split()
+
+    stopwords = {"paid", "to", "at", "for", "on", "spent", "rs", "inr"}
+    filtered = [w for w in words if w not in stopwords and not w.isdigit()]
+
+    return filtered[0] if filtered else None
+
+
+# ---------- MAIN PREDICT ----------
+
 @app.route("/api/predict", methods=["POST"])
 def predict():
     data = request.json
-    description = data.get("description", "")
+    text = data.get("text", "")
 
-    if not description:
-        return jsonify({"error": "Description is required"}), 400
+    if not text:
+        return jsonify({"error": "Text is required"}), 400
 
-    # First try rules
-    category = get_category_from_rules(description)
+    # ---- Extraction ----
+    amount = extract_amount(text)
+    merchant = extract_merchant(text)
+
+    # ---- Rule-based classification ----
+    category = get_category_from_rules(text)
 
     if category:
-        prediction = category   
+        confidence = 0.95  # rules are high confidence
     else:
-        # fallback to ML
-        X = vectorizer.transform([description])
-        prediction = model.predict(X)[0]
+        # ---- ML classification ----
+        X = vectorizer.transform([text])
+        probs = model.predict_proba(X)[0]
+        prediction = model.classes_[np.argmax(probs)]
+        confidence = float(np.max(probs))
 
-    return jsonify({"category": prediction})
+        category = prediction
+
+    return jsonify({
+        "amount": amount,
+        "merchant": merchant,
+        "category": category,
+        "confidence": round(confidence, 3)
+    })
+
+
+# ---------- SERVER ----------
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
