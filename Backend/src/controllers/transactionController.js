@@ -77,7 +77,7 @@ exports.syncGmail = async (req, res) => {
     try {
       emails = await fetchBankEmails(accessToken, bankEmails);
     } catch (err) {
-      console.error('❌ Gmail fetch error:', err);
+      console.error('Gmail fetch error:', err);
       return res.status(500).json({ error: 'Failed to fetch Gmail messages' });
     }
 
@@ -103,10 +103,10 @@ exports.syncGmail = async (req, res) => {
           });
           queued++;
         } else {
-          console.log(`⚠️ Skipped duplicate txn ref: ${parsed.referenceNumber}`);
+          console.log(`Skipped duplicate transaction reference: ${parsed.referenceNumber}`);
         }
       } catch (err) {
-        console.error('❌ Parse error:', err.message, 'Snippet:', email.snippet);
+        console.error('Parse error:', err.message, 'Snippet:', email.snippet);
       }
     }
 
@@ -119,7 +119,7 @@ exports.syncGmail = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Unexpected sync error:', error);
+    console.error('Unexpected sync error:', error);
     return res.status(500).json({ error: 'Unexpected sync error' });
   }
 };

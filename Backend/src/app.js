@@ -14,9 +14,9 @@ app.use(passport.initialize());
 (async () => {
   try {
     await connectRabbit();
-    console.log('🐇 RabbitMQ ready for publishing');
+    console.log('RabbitMQ is ready for publishing');
   } catch (err) {
-    console.error('❌ Failed to init RabbitMQ in app.js:', err.message);
+    console.error('Failed to initialize RabbitMQ in app.js:', err.message);
   }
 })();
 
