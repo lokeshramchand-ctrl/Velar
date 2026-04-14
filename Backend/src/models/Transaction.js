@@ -1,24 +1,22 @@
 const mongoose = require('mongoose');
 
 const transactionSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  amount: { type: Number, required: true },
+  text: { type: String, required: true },        // raw input (VERY important)
+
+  amount: { type: Number },
+  merchant: { type: String },
+
   category: { type: String, default: "Other" },
-  date: { type: Date, default: Date.now },
-  source: { 
-    type: String, 
-    enum: ['manual', 'voice', 'email'], 
-    required: true 
+  confidence: { type: Number },
+
+  source: {
+    type: String,
+    enum: ['manual', 'voice'],
+    required: true
   },
 
-  // Optional fields
-  description: { type: String }, 
-  type: { type: String, enum: ['debit', 'credit', 'unknown'], default: "unknown" },
-  vendor: { type: String },
-  referenceNumber: { type: String, unique: true, sparse: true }, // prevents dup emails
+  date: { type: Date, default: Date.now }
 
-  // Flexible extension
-  metadata: { type: Object }, // catch-all for future use
 }, { timestamps: true });
 
 module.exports = mongoose.model('Transaction', transactionSchema);
