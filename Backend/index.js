@@ -5,158 +5,153 @@ const axios = require('axios');
 const cors = require('cors');
 
 const app = express();
-app.use(express.json());
 
+/* ---------- MIDDLEWARE ---------- */
+app.use(express.json());
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || '*',
-  credentials: true
+  origin: process.env.CORS_ORIGIN || '*'
 }));
 
-/* ---------- MODELS ---------- */
-const userSchema = new mongoose.Schema({
-  name: String,
-  email: String,
-  createdAt: { type: Date, default: Date.now }
-});
-const User = mongoose.model('User', userSchema);
+/* ---------- DATABASE ---------- */
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => console.error(err));
 
+/* ---------- MODEL ---------- */
 const transactionSchema = new mongoose.Schema({
-  userId: { type: String, required: true },
-  description: { type: String, required: true },
-  amount: { type: Number, required: true },
-  category: { type: String, default: "Other" },
+  text: { type: String, required: true },          // raw input (important for ML)
+  amount: Number,
+  merchant: String,
+  category: { type: String, default: 'Other' },
+  confidence: Number,
   date: { type: Date, default: Date.now },
-  type: { type: String, default: "unknown" },
-  vendor: String,
-  source: { type: String, enum: ['manual', 'voice', 'email'], required: true },
-  referenceNumber: { type: String, unique: true, sparse: true },
+  source: { type: String, enum: ['manual', 'voice'], required: true }
 });
+
 const Transaction = mongoose.model('Transaction', transactionSchema);
 
-/* ---------- DEV AUTH (NO OAUTH) ---------- */
-app.use((req, res, next) => {
-  req.user = {
-    _id: "devuserid123",
-    name: "Dev User",
-    email: "dev@test.com"
-  };
-  next();
-});
+/* ---------- SERVICES ---------- */
+async function predict(text) {
+  const res = await axios.post(
+    `http://${process.env.PREDICT_API_HOST}/api/predict`,
+    { text }
+  );
 
-/* ---------- USER ROUTES ---------- */
-app.get('/profile', (req, res) => {
-  res.json({
-    id: req.user._id,
-    name: req.user.name,
-    email: req.user.email
-  });
-});
+  return res.data; // expected: { amount, merchant, category, confidence }
+}
 
-/* ---------- TRANSACTION ROUTES ---------- */
-app.post('/api/transaction/add', async (req, res) => {
+/* ---------- ROUTES ---------- */
+
+/**
+ * Add transaction (manual input)
+ */
+app.post('/api/transaction', async (req, res) => {
   try {
-    const userId = req.user._id;
-    const { description, amount } = req.body;
+    const { text } = req.body;
 
-    const predictRes = await axios.post(`http://${process.env.PREDICT_API_HOST}/api/predict`, {
-      description,
+    if (!text) {
+      return res.status(400).json({ error: 'Text is required' });
+    }
+
+    const prediction = await predict(text);
+
+    const transaction = new Transaction({
+      text,
+      amount: prediction.amount,
+      merchant: prediction.merchant,
+      category: prediction.category || 'Other',
+      confidence: prediction.confidence,
+      source: 'manual'
     });
 
-    const category = predictRes.data.category || 'Other';
+    await transaction.save();
 
-    const newTransaction = new Transaction({
-      userId,
-      description,
-      amount,
-      category,
-      source: 'manual',
-    });
+    res.json({ success: true, data: transaction });
 
-    await newTransaction.save();
-
-    res.json({ message: 'Transaction saved', data: newTransaction });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.get('/api/transactions', async (req, res) => {
+/**
+ * Voice input (same pipeline, just labeled differently)
+ */
+app.post('/api/transaction/voice', async (req, res) => {
   try {
-    const userId = req.user._id;
-    const { category } = req.query;
-
-    let query = { userId };
-    if (category && category !== 'All') query.category = category;
-
-    const transactions = await Transaction.find(query).sort({ date: -1 });
-
-    res.json({ success: true, data: transactions });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.get('/api/transactions/recent', async (req, res) => {
-  try {
-    const userId = req.user._id;
-
-    const transactions = await Transaction.find({ userId })
-      .sort({ date: -1 })
-      .limit(5);
-
-    res.json({ success: true, data: transactions });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-/* ---------- VOICE ---------- */
-app.post('/api/transactions/voice', async (req, res) => {
-  try {
-    const userId = req.user._id;
     const { voiceInput } = req.body;
 
-    const amountMatch = voiceInput.match(/(?:₹|\$)?(\d+(?:\.\d{1,2})?)/);
-    const amount = amountMatch ? parseFloat(amountMatch[1]) : null;
+    if (!voiceInput) {
+      return res.status(400).json({ error: 'Voice input is required' });
+    }
 
-    const cleaned = voiceInput
-      .toLowerCase()
-      .replace(/(bought|added|paid|spent|for|on)/g, '')
-      .replace(/₹?\d+/, '')
-      .trim();
+    const prediction = await predict(voiceInput);
 
-    const description = cleaned || 'misc';
-
-    const predictRes = await axios.post(`http://${process.env.PREDICT_API_HOST}/api/predict`, {
-      description,
-    });
-
-    const category = predictRes.data?.category || 'Other';
-
-    const newTransaction = new Transaction({
-      userId,
-      description,
-      amount,
-      category,
+    const transaction = new Transaction({
+      text: voiceInput,
+      amount: prediction.amount,
+      merchant: prediction.merchant,
+      category: prediction.category || 'Other',
+      confidence: prediction.confidence,
       source: 'voice'
     });
 
-    await newTransaction.save();
+    await transaction.save();
 
-    res.json({ message: 'Voice transaction saved', data: newTransaction });
+    res.json({ success: true, data: transaction });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * Get all transactions
+ */
+app.get('/api/transactions', async (req, res) => {
+  try {
+    const data = await Transaction.find().sort({ date: -1 });
+    res.json({ success: true, data });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * Direct prediction endpoint (for experiments)
+ */
+app.post('/api/predict', async (req, res) => {
+  try {
+    const { text } = req.body;
+
+    if (!text) {
+      return res.status(400).json({ error: 'Text is required' });
+    }
+
+    const result = await predict(text);
+    res.json(result);
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * Dataset export (VERY IMPORTANT for research)
+ */
+app.get('/api/dataset', async (req, res) => {
+  try {
+    const data = await Transaction.find();
+    res.json({ count: data.length, data });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
 /* ---------- SERVER ---------- */
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.error(err));
-
 const HOST = process.env.HOST || '0.0.0.0';
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, HOST, () => {
   console.log(`Server running at http://${HOST}:${PORT}`);
 });
+

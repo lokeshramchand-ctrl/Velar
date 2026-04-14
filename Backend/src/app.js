@@ -1,26 +1,16 @@
 const express = require('express');
 const cors = require('cors');
-const passport = require('passport');
 require('dotenv').config();
 
-const authRoutes = require('./routes/authRoutes');
 const transactionRoutes = require('./routes/transactionRoutes');
-const { connectRabbit } = require('./config/rabbitmq');
+
 const app = express();
 
+/* ---------- MIDDLEWARE ---------- */
 app.use(express.json());
-app.use(cors({ origin: process.env.CORS_ORIGIN || '*', credentials: true }));
-app.use(passport.initialize());
-(async () => {
-  try {
-    await connectRabbit();
-    console.log('RabbitMQ is ready for publishing');
-  } catch (err) {
-    console.error('Failed to initialize RabbitMQ in app.js:', err.message);
-  }
-})();
+app.use(cors({ origin: '*' }));
 
-app.use('/auth', authRoutes);
+/* ---------- ROUTES ---------- */
 app.use('/api/transactions', transactionRoutes);
 
 module.exports = app;
