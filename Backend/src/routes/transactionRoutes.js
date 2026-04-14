@@ -3,13 +3,23 @@ const transactionController = require('../controllers/transactionController');
 
 const router = express.Router();
 
-router.post('/add', transactionController.addTransaction);
+/**
+ * Create transaction (manual / voice unified)
+ */
+router.post('/', transactionController.createTransaction);
+
+
+ // Get all transactions (dataset view)
 
 router.get('/', transactionController.getTransactions);
 
-router.get('/recent', transactionController.getRecentTransaction);
+ //Direct prediction (no DB write) - for experiments
 
-router.post('/voice', transactionController.voiceTransaction);
+router.post('/predict', transactionController.predictOnly);
 
+
+ //Export dataset (for training / evaluation)
+
+router.get('/dataset', transactionController.exportDataset);
 
 module.exports = router;
