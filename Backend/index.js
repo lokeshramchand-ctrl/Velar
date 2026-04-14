@@ -57,7 +57,18 @@ app.use(session(sessionOptions));
 
 app.use(passport.initialize());
 app.use(passport.session());
+if (process.env.NODE_ENV === "development") {
+  console.log("🚀 Running in DEV mode (OAuth disabled)");
 
+  app.use((req, res, next) => {
+    req.user = {
+      _id: "devuserid123",
+      displayName: "Dev User",
+      email: "dev@test.com"
+    };
+    next();
+  });
+}
 /* ---------- PASSPORT ---------- */
 passport.serializeUser((user, done) => {
   done(null, user._id);
@@ -71,26 +82,26 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
-passport.use(new GoogleStrategy({
-  clientID: process.env.GOOGLE_CLIENT_ID,
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: process.env.GOOGLE_REDIRECT_URI
-}, async (accessToken, refreshToken, profile, done) => {
-  try {
-    const email = profile.emails && profile.emails[0] && profile.emails[0].value;
-    const update = {
-      displayName: profile.displayName,
-      email,
-      accessToken,
-      ...(refreshToken ? { refreshToken } : {})
-    };
-    const opts = { upsert: true, new: true, setDefaultsOnInsert: true };
-    const user = await User.findOneAndUpdate({ googleId: profile.id }, update, opts);
-    return done(null, user);
-  } catch (err) {
-    return done(err);
-  }
-}));
+// passport.use(new GoogleStrategy({
+//   clientID: process.env.GOOGLE_CLIENT_ID,
+//   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+//   callbackURL: process.env.GOOGLE_REDIRECT_URI
+// }, async (accessToken, refreshToken, profile, done) => {
+//   try {
+//     const email = profile.emails && profile.emails[0] && profile.emails[0].value;
+//     const update = {
+//       displayName: profile.displayName,
+//       email,
+//       accessToken,
+//       ...(refreshToken ? { refreshToken } : {})
+//     };
+//     const opts = { upsert: true, new: true, setDefaultsOnInsert: true };
+//     const user = await User.findOneAndUpdate({ googleId: profile.id }, update, opts);
+//     return done(null, user);
+//   } catch (err) {
+//     return done(err);
+//   }
+// }));
 
 /* ---------- GOOGLE OAUTH ROUTES (WEB) ---------- */
 app.get('/auth/google', passport.authenticate('google', {
@@ -160,7 +171,7 @@ app.post('/api/transaction/add', async (req, res) => {
     const { description, amount, userId } = req.body;
     if (!userId) return res.status(400).json({ error: 'Missing userId' });
 
-    const predictRes = await axios.post('http://192.168.1.8:5000/api/predict', {
+    const predictRes = await axios.post('http://192.168.1.40:5000/api/predict', {
       description,
     });
     const category = predictRes.data.category || 'Other';
@@ -233,7 +244,7 @@ app.post('/api/transactions/voice', async (req, res) => {
     const description = cleaned || 'misc';
 
     // Step 3: Predict category using Flask API
-    const predictRes = await axios.post('http://192.168.1.8:5000/api/predict', {
+    const predictRes = await axios.post('http://192.168.1.40:5000/api/predict', {
       description,
     });
     const category = predictRes.data?.category || 'Other';
@@ -439,7 +450,7 @@ app.post('/api/sync-gmail', async (req, res) => {
 
       let category = 'Other';
       try {
-        const predictRes = await axios.post('http://192.168.1.8:5000/api/predict', {
+        const predictRes = await axios.post('http://192.168.1.40:5000/api/predict', {
           description: parsed.vendor || "Unknown"
         }, { timeout: 5000 }); // Optional timeout
 
