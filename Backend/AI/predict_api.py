@@ -49,7 +49,7 @@ def predict():
     category = get_category_from_rules(description)
 
     if category:
-        prediction = category   # ✅ assign directly
+        prediction = category   
     else:
         # fallback to ML
         X = vectorizer.transform([description])
